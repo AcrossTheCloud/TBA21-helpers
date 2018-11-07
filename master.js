@@ -14,7 +14,7 @@ module.exports.start = (event, context, callback) => {
   }
 
   return stepfunctions.startExecution(params).promise().then(() => {
-    callback(null, `Your statemachine ${stateMachineArn} executed successfully for job ${params.name}`);
+    callback(null, `Your statemachine ${process.env.stateMachineArn} executed successfully for job ${params.name}`);
   }).catch(error => {
     callback(error.message);
   });
