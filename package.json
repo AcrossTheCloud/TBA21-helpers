@@ -1,0 +1,25 @@
+{
+  "name": "midsomermurderplots",
+  "version": "0.0.1",
+  "license": "GPL-3.0",
+  "description": "TBA21 helper functions",
+  "main": "bot.js",
+  "scripts": {
+    "test": "eslint .",
+    "deploy": "serverless deploy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AcrossTheCloud/TBA21-helpers.git"
+  },
+  "author": "Matthew Berryman",
+  "bugs": {
+    "url": "https://github.com/AcrossTheCloud/TBA21-helpers/issues"
+  },
+  "homepage": "https://github.com/AcrossTheCloud/TBA21-helpers",
+  "dependencies": {},
+  "devDependencies": {
+    "serverless-pseudo-parameters": "^2.2.0",
+    "serverless-step-functions": "^1.8.0"
+  }
+}
