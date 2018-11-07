@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 
 const stepfunctions = new AWS.StepFunctions();
 
-module.exports.start = (event) => {
+module.exports.start = (event, context, callback) => {
   const s3Record = event.Records[0].s3;
   const srcBucket = s3Record.bucket.name;
   const srcKey = decodeURIComponent(s3Record.object.key.replace(/\+/g, " "));
