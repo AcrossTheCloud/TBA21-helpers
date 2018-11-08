@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 
-module.exports.handler = async(event) => {
+module.exports.handler = (event, context, callback) => {
 
   if (event.srcKey.match(/\.mp.*/)) {
     const params = {
@@ -11,7 +11,7 @@ module.exports.handler = async(event) => {
     };
     s3.copyObject(params, function(err, data) {
       if (err) console.log(err, err.stack); // an error occurred
-      else     console.log(data);           // successful response
+      else     callback(data);           // successful response
     });
   }
 
