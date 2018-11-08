@@ -5,17 +5,13 @@ const rekognition = new AWS.Rekognition();
 
 exports.handler = async (event) => {
 
-    let s3Record = event.Records[0].s3;
-    let srcBucket = s3Record.bucket.name;
-    let srcKey = decodeURIComponent(s3Record.object.key.replace(/\+/g, " "));
-    console.log(srcBucket);
-    console.log(srcKey);
+  if (event.srcKey.toLowerCase().endsWith('.png') || event.srcKey.toLowerCase().endsWith('.jpg') || event.srcKey.toLowerCase().endsWith('.jpeg')) {
 
     let params = {
         Image: {
             S3Object: {
-                Bucket: srcBucket,
-                Name: srcKey
+                Bucket: event.srcBucket,
+                Name: event.srcKey
             }
         },
         MaxLabels: 10,
@@ -29,8 +25,10 @@ exports.handler = async (event) => {
       TableName: process.env.IMAGE_TAG_TABLE,
       Item: requestData
     };
-    AWS.config.update({region: 'eu-central-1'});
+
+    //AWS.config.update({region: 'eu-central-1'});
     let docClient = new AWS.DynamoDB.DocumentClient();
     let dynamoDBdata = await docClient.put(putParams).promise();
     console.log(dynamoDBdata);
+  }
 }

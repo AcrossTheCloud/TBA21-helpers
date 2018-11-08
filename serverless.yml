@@ -32,6 +32,16 @@ provider:
         - "s3:*"
       Resource:
         - "arn:aws:s3:::acrossthecloud-tba21-helper-test/*"
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource:
+        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/tba21*"
 
 plugins:
   - serverless-pseudo-parameters
@@ -46,6 +56,10 @@ functions:
       stateMachineArn: ${self:resources.Outputs.TBA21FileProcessorStateMachine.Value}
   generateMP3:
     handler: generate_mp3.handler
+  image_tagger:
+    handler: image_tagger.handler
+    environment:
+      IMAGE_TAG_TABLE: tba21-image-tags-dev
   example:
     handler: example.handler
 

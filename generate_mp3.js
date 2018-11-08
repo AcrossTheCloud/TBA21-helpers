@@ -2,10 +2,11 @@ const util = require('util');
 const execFile = util.promisify(require('child_process').execFile);
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
+const fs = require('fs');
 
 const generateMP3 = async (file) => {
   const outputFile = file.substring(0,file.lastIndexOf('.'))+'_Alexa_audio.mp3';
-  const { error, stdout, stderr } = await execFile('ffmpeg',['-i',file,'-ac', '2', '-codec:a','libmp3lame','-b:a','48k','-ar','16000',outputFile]);
+  const { error, stdout, stderr } = await execFile('bin/ffmpeg',['-i',file,'-ac', '2', '-codec:a','libmp3lame','-b:a','48k','-ar','16000',outputFile]);
   if (error) {
     console.log(error.code);
     console.log(stderr);
@@ -31,26 +32,29 @@ const download = async (srcBucket, srcKey) => {
 }
 
 const upload = async (filename, bucket) => {
-  let srcBucket = s3Record.bucket.name;
-  let srcKey = decodeURIComponent(s3Record.object.key.replace(/\+/g, " "));
 
   let stream = fs.createReadStream(filename);
-  let put = await s3.putObject({Bucket: bucket, Key: filename, Body: stream}).promise();
+  let put = await s3.putObject({Bucket: bucket, Key: filename.substring(5), Body: stream}).promise();
   return put;
 
 }
 
 module.exports.handler = async(event) => {
 
-  let filename = await download(event.srcBucket, event.srcKey);
-  let outputFile = await generateMP3(file);
+  if (event.srcKey.match(/\.mp.*/) || event.srcKey.match(/\.m4a/)) {
 
-  if (outputFile) {
-    let put = await upload(filename,srcBucket);
-    return put;
-  } else {
-    return '';
+    let filename = await download(event.srcBucket, event.srcKey);
+    console.log(filename);
+    let outputFile = await generateMP3(filename);
+    console.log(outputFile);
+
+    if (outputFile) {
+      let put = await upload(outputFile,event.srcBucket);
+      return put;
+    } else {
+      return '';
+    }
+
   }
-
 
 }
