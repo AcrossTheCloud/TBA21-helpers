@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/AcrossTheCloud/TBA21-helpers",
   "dependencies": {
+    "image-hash": "^2.0.0",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
