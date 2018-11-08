@@ -71,6 +71,10 @@ functions:
     handler: copy_for_vid_transcoding.handler
     environment:
       TRANSCODE_BUCKET: tba21-vod-source-li2dfglvvsiy
+  hashes:
+    handler: hashes.handler
+    environment:
+      HASHES_TABLE: tba21-hashes
 
 stepFunctions:
   stateMachines:
