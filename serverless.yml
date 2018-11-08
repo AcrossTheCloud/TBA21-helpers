@@ -27,6 +27,11 @@ provider:
         - "states:StartExecution"
       Resource:
         - Ref: TBA21FileProcessorStateMachine
+    - Effect: "Allow"
+      Action:
+        - "s3:*"
+      Resource:
+        - Ref: "arn:aws:s3:::acrossthecloud-tba21-helper-test/*"
 
 plugins:
   - serverless-pseudo-parameters
