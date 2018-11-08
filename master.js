@@ -1,4 +1,5 @@
 const AWS = require('aws-sdk');
+const uuid = require('uuid/v1');
 
 const stepfunctions = new AWS.StepFunctions();
 
@@ -10,7 +11,7 @@ module.exports.start = (event, context, callback) => {
   const params = {
     stateMachineArn: process.env.stateMachineArn,
     input: JSON.stringify({srcBucket: srcBucket, srcKey: srcKey}),
-    name: srcKey
+    name: srcKey+uuid()
   }
 
   return stepfunctions.startExecution(params).promise().then(() => {

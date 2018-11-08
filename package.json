@@ -17,7 +17,9 @@
     "url": "https://github.com/AcrossTheCloud/TBA21-helpers/issues"
   },
   "homepage": "https://github.com/AcrossTheCloud/TBA21-helpers",
-  "dependencies": {},
+  "dependencies": {
+    "uuid": "^3.3.2"
+  },
   "devDependencies": {
     "serverless-pseudo-parameters": "^2.2.0",
     "serverless-step-functions": "^1.8.0"
