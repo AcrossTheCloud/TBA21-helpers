@@ -19,7 +19,7 @@ exports.handler = async (event) => {
     };
 
     let rekognitionData = await rekognition.detectLabels(params).promise();
-    let requestData = {"key": srcKey, "labels": rekognitionData.Labels };
+    let requestData = {"key": event.srcKey, "labels": rekognitionData.Labels };
 
     let putParams = {
       TableName: process.env.IMAGE_TAG_TABLE,
