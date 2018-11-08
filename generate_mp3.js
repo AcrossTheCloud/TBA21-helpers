@@ -3,6 +3,7 @@ const execFile = util.promisify(require('child_process').execFile);
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 const fs = require('fs');
+const download = require('./common').download;
 
 const generateMP3 = async (file) => {
   const outputFile = file.substring(0,file.lastIndexOf('.'))+'_Alexa_audio.mp3';
@@ -15,20 +16,6 @@ const generateMP3 = async (file) => {
   } else {
     return outputFile;
   }
-}
-
-const download = async (srcBucket, srcKey) => {
-  const s3 = new AWS.S3();
-  let params = {Bucket: srcBucket, Key: srcKey};
-  let file = require('fs').createWriteStream('/tmp/'+srcKey);
-  let fd = s3.getObject(params).createReadStream();
-  fd.pipe(file);
-  let end = new Promise(function(resolve, reject) {
-    fd.on('end', ()=>resolve('/tmp/'+srcKey));
-    fd.on('error', reject); // or something like that
-  });
-  let filename = await end;
-  return filename;
 }
 
 const upload = async (filename, bucket) => {
