@@ -32,6 +32,8 @@ provider:
         - "s3:*"
       Resource:
         - "arn:aws:s3:::acrossthecloud-tba21-helper-test/*"
+        - "arn:aws:s3:::tba21-vod-source-li2dfglvvsiy/*"
+        - "arn:aws:s3:::tba21-content*/*"
     - Effect: Allow
       Action:
         - dynamodb:Query
@@ -60,8 +62,10 @@ functions:
     handler: image_tagger.handler
     environment:
       IMAGE_TAG_TABLE: tba21-image-tags-dev
-  example:
-    handler: example.handler
+  copy_video_for_transcoding:
+    handler: copy_for_vid_transcoding.handler
+    environment:
+      TRANSCODE_BUCKET: tba21-vod-source-li2dfglvvsiy
 
 stepFunctions:
   stateMachines:
@@ -80,11 +84,17 @@ stepFunctions:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-generateMP3
                   End: true
-            - StartAt: example
+            - StartAt: image_tagger
               States:
                 example:
                   Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-example
+                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
+                  End: true
+            - StartAt: video_transcode_starter
+              States:
+                example:
+                  Type: Task
+                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_video_for_transcoding
                   End: true
           Final State:
             Type: Pass
