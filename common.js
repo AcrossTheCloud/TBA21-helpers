@@ -1,3 +1,5 @@
+const AWS = require('aws-sdk');
+
 module.exports.download = async (srcBucket, srcKey) => {
   const s3 = new AWS.S3();
   let params = {Bucket: srcBucket, Key: srcKey};

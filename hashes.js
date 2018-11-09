@@ -3,6 +3,7 @@ const fs = require('fs');
 const download = require('./common').download;
 const imageHash = require('image-hash');
 const crypto = require('crypto');
+const docClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async(event) => {
 
