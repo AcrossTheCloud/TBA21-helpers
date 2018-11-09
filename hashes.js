@@ -1,7 +1,8 @@
 const AWS = require('aws-sdk');
 const fs = require('fs');
 const download = require('./common').download;
-const imageHash = require('image-hash');
+const util = require('util');
+const imageHash = util.promisify(require('image-hash'));
 const crypto = require('crypto');
 const docClient = new AWS.DynamoDB.DocumentClient();
 
@@ -27,12 +28,10 @@ module.exports.handler = async(event) => {
   hashes.sha512 = await checksumFile('sha512',filename);
   hashes.md5 = await checksumFile('md5',filename);
 
+
   if (event.srcKey.toLowerCase().endsWith('.png') || event.srcKey.toLowerCase().endsWith('.jpg') || event.srcKey.toLowerCase().endsWith('.jpeg')) {
 
-    imageHash(filename, 16, true, (error, data) => {
-      if (error) throw error;
-      hashes.imageHash = data;
-    });
+    hashes.imageHash = await imageHash(filename, 16, true);
 
   }
 
