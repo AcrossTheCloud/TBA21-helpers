@@ -24,8 +24,8 @@ module.exports.handler = async(event) => {
 
   hashes.key = filename.substring(5);
 
-  hashes.sha512 = checksumFile('sha512',filename);
-  hashes.md5 = checksumFile('md5',filename);
+  hashes.sha512 = await checksumFile('sha512',filename);
+  hashes.md5 = await checksumFile('md5',filename);
 
   if (event.srcKey.toLowerCase().endsWith('.png') || event.srcKey.toLowerCase().endsWith('.jpg') || event.srcKey.toLowerCase().endsWith('.jpeg')) {
 
