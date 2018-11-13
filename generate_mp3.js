@@ -4,6 +4,7 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 const fs = require('fs');
 const download = require('./common').download;
+const upload = require('./common').upload;
 
 const generateMP3 = async (file) => {
   const outputFile = file.substring(0,file.lastIndexOf('.'))+'_Alexa_audio.mp3';
@@ -16,14 +17,6 @@ const generateMP3 = async (file) => {
   } else {
     return outputFile;
   }
-}
-
-const upload = async (filename, bucket) => {
-
-  let stream = fs.createReadStream(filename);
-  let put = await s3.putObject({Bucket: bucket, Key: filename.substring(5), Body: stream}).promise();
-  return put;
-
 }
 
 module.exports.handler = async(event) => {

@@ -13,3 +13,12 @@ module.exports.download = async (srcBucket, srcKey) => {
   let filename = await end;
   return filename;
 }
+
+
+module.exports.upload = async (filename, bucket) => {
+
+  let stream = fs.createReadStream(filename);
+  let put = await s3.putObject({Bucket: bucket, Key: filename.substring(5), Body: stream}).promise();
+  return put;
+
+}
