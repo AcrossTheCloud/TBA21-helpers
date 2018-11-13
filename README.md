@@ -8,3 +8,6 @@ processing scripts for TBA21:
 
 ## Step diagram
 ![Step function diagram](step_diagram.png)
+
+## Included code
+[dcraw](src/drcraw.c) by Dave Coffin from [http://www.cybercom.net/~dcoffin/dcraw/](http://www.cybercom.net/~dcoffin/dcraw/).
