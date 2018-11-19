@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 
 const rekognition = new AWS.Rekognition();
-// const docClient = new AWS.DynamoDB.DocumentClient();
+const docClient = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
 
@@ -26,8 +26,6 @@ exports.handler = async (event) => {
       Item: requestData
     };
 
-    //AWS.config.update({region: 'eu-central-1'});
-    let docClient = new AWS.DynamoDB.DocumentClient();
     let dynamoDBdata = await docClient.put(putParams).promise();
     console.log(dynamoDBdata);
   }
