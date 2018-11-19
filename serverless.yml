@@ -75,6 +75,10 @@ functions:
     handler: hashes.handler
     environment:
       HASHES_TABLE: tba21-hashes
+  exif:
+    handler: exif.handler
+    environment:
+      IMAGE_EXIF_TABLE: tba21-image-exif-dev
 
 stepFunctions:
   stateMachines:
@@ -110,6 +114,12 @@ stepFunctions:
                 video_transcode_starter:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_video_for_transcoding
+                  End: true
+            - StartAt: exif
+              States:
+                exif:
+                  Type: Task
+                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
                   End: true
           Final State:
             Type: Pass

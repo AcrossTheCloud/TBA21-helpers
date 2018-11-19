@@ -14,6 +14,16 @@ module.exports.download = async (srcBucket, srcKey) => {
   return filename;
 }
 
+module.exports.delete_empty_strings = (inputObject) => {
+  for (let i in inputObject) {
+    if (inputObject[i] === '') {
+      delete inputObject[i];
+    } else if (typeof inputObject[i] === 'object') {
+      module.exports.delete_empty_strings(inputObject[i]);
+    }
+  }
+}
+
 
 module.exports.upload = async (filename, bucket) => {
 

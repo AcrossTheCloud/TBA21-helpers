@@ -10,4 +10,6 @@ processing scripts for TBA21:
 ![Step function diagram](step_diagram.png)
 
 ## Included code
-[dcraw](src/drcraw.c) by Dave Coffin from [http://www.cybercom.net/~dcoffin/dcraw/](http://www.cybercom.net/~dcoffin/dcraw/).
+* [dcraw](src/drcraw.c) by Dave Coffin from [http://www.cybercom.net/~dcoffin/dcraw/](http://www.cybercom.net/~dcoffin/dcraw/).
+* [exiftool](src/exiftool) by Phil Harvey from [https://sno.phy.queensu.ca/~phil/exiftool/](https://sno.phy.queensu.ca/~phil/exiftool/) under [Perl licence](http://dev.perl.org/licenses/)
+
