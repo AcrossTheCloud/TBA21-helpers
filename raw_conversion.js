@@ -21,7 +21,7 @@ const raw_conversion = async (file) => {
 
 module.exports.handler = async(event) => {
 
-  if (event.srcKey.match(/\.raw$/) || event.srcKey.match(/\.cr2$/)) {
+  if (event.magic.match(/raw image/)) {
 
     let filename = await download(event.srcBucket, event.srcKey);
     console.log(filename);
