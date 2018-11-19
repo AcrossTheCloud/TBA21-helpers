@@ -79,6 +79,8 @@ functions:
     handler: exif.handler
     environment:
       IMAGE_EXIF_TABLE: tba21-image-exif-dev
+  raw_conversion:
+    handler: raw_conversion.handler
 
 stepFunctions:
   stateMachines:
@@ -120,6 +122,12 @@ stepFunctions:
                 exif:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
+                  End: true
+            - StartAt: raw_conversion
+              States:
+                raw_conversion:
+                  Type: Task
+                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion
                   End: true
           Final State:
             Type: Pass
