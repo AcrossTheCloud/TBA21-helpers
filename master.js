@@ -1,10 +1,12 @@
 const AWS = require('aws-sdk');
 const uuid = require('uuid/v1');
+const util = require('util');
+const execFile = util.promisify(require('child_process').execFile);
 const download = require('./common').download;
 
 const stepfunctions = new AWS.StepFunctions();
 
-module.exports.start = (event, context, callback) => {
+module.exports.start = async (event, context, callback) => {
   const s3Record = event.Records[0].s3;
   const srcBucket = s3Record.bucket.name;
   const srcKey = decodeURIComponent(s3Record.object.key.replace(/\+/g, " "));
