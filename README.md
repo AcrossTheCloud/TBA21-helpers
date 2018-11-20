@@ -5,6 +5,7 @@ processing scripts for TBA21:
 * Use AWS Rekognition to put image tags in AWS DynamoDB.
 * Store file hashes.
 * Store image hashes for image files.
+* RAW image conversion to JPG.
 
 ## Step diagram
 ![Step function diagram](step_diagram.png)
@@ -12,4 +13,4 @@ processing scripts for TBA21:
 ## Included code
 * [dcraw](src/drcraw.c) by Dave Coffin from [http://www.cybercom.net/~dcoffin/dcraw/](http://www.cybercom.net/~dcoffin/dcraw/).
 * [exiftool](src/exiftool) by Phil Harvey from [https://sno.phy.queensu.ca/~phil/exiftool/](https://sno.phy.queensu.ca/~phil/exiftool/) under [Perl licence](http://dev.perl.org/licenses/)
-
+* [cjpeg](jpeg-9c) jpeg tools from the [JPEG Club](http://jpegclub.org/)

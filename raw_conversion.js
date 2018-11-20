@@ -11,16 +11,14 @@ const upload = require('./common').upload;
 
 const raw_conversion = async (file) => {
   const outputFile = file.substring(0,file.lastIndexOf('.'))+'.jpg';
-
-
-  let process = spawn('bin/dcraw', ['-c', '-q','0','-w','-H','5','-b','8',file,'| cjpeg -quality 80','>',outputFile,]);
   
   let end = new Promise(function (resolve, reject) {
-    process.on('close', (code) => resolve(code));
-    process.on('error', reject); // or something like that
+    spawn('bin/dcraw', ['-c', '-q', '3', '-w', '-H', '5', file,]).stdout.pipe(
+      spawn('bin/cjpeg').stdout.pipe(
+        fs.createWriteStream(outputFile, { encoding: null }).on('finish', () => resolve('done'))));
   });
-  let exitCode = await end;
-  console.log(exitCode);
+  let finishedWriting = await end;
+  console.log(finishedWriting);
 
   return outputFile;
 }

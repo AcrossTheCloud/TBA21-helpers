@@ -1,9 +1,11 @@
 const AWS = require('aws-sdk');
+const fs = require('fs');
+const s3 = new AWS.S3();
 
 module.exports.download = async (srcBucket, srcKey) => {
-  const s3 = new AWS.S3();
+
   let params = {Bucket: srcBucket, Key: srcKey};
-  let file = require('fs').createWriteStream('/tmp/'+srcKey);
+  let file = fs.createWriteStream('/tmp/'+srcKey, {encoding: null});
   let fd = s3.getObject(params).createReadStream();
   fd.pipe(file);
   let end = new Promise(function(resolve, reject) {
