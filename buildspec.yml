@@ -8,3 +8,4 @@ phases:
     commands:
       - npm install -g serverless
       - serverless deploy
+      - serverless s3deploy
