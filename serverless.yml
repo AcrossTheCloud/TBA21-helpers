@@ -17,17 +17,11 @@ service: TBA21-helpers # NOTE: update this with your service name
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
 
-plugins:
-  - serverless-pseudo-parameters
-  - serverless-step-functions
-  - serverless-plugin-existing-s3
-
 provider:
   name: aws
   runtime: nodejs8.10
   region: eu-west-1
   timeout: 300
-
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -55,7 +49,9 @@ provider:
       Resource:
         - "*"
 
-
+plugins:
+  - serverless-pseudo-parameters
+  - serverless-step-functions
 
 functions:
   master:
