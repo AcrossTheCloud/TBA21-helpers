@@ -20,7 +20,7 @@ service: TBA21-helpers # NOTE: update this with your service name
 provider:
   name: aws
   runtime: nodejs8.10
-  region: ap-southeast-2
+  region: eu-west-1
   timeout: 300
   iamRoleStatements:
     - Effect: "Allow"
@@ -32,9 +32,7 @@ provider:
       Action:
         - "s3:*"
       Resource:
-        - "arn:aws:s3:::acrossthecloud-tba21-helper-test/*"
-        - "arn:aws:s3:::tba21-vod-source-li2dfglvvsiy/*"
-        - "arn:aws:s3:::tba21-content*/*"
+        - "arn:aws:s3:::oceanarchive-helper-test/*"
     - Effect: Allow
       Action:
         - dynamodb:Query
@@ -59,7 +57,7 @@ functions:
   master:
     handler: master.start
     events:
-      - s3: acrossthecloud-tba21-helper-test
+      - s3: oceanarchive-helper-test
     environment:
       stateMachineArn: ${self:resources.Outputs.TBA21FileProcessorStateMachine.Value}
   generateMP3:
