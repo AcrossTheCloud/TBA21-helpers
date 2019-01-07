@@ -23,7 +23,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "serverless-pseudo-parameters": "^2.2.0",
-    "serverless-step-functions": "^1.8.0"
+    "serverless-pseudo-parameters": "^2.4.0",
+    "serverless-step-functions": "^1.9.0"
   }
 }
