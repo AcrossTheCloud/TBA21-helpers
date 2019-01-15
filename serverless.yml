@@ -69,7 +69,7 @@ functions:
   copy_video_for_transcoding:
     handler: copy_for_vid_transcoding.handler
     environment:
-      TRANSCODE_BUCKET: tba21-vod-source-li2dfglvvsiy
+      TRANSCODE_BUCKET: oceanarchive-video-on-demand-source-1xdwtz84a23si
   hashes:
     handler: hashes.handler
     environment:
