@@ -14,3 +14,6 @@ processing scripts for TBA21:
 * [dcraw](src/drcraw.c) by Dave Coffin from [http://www.cybercom.net/~dcoffin/dcraw/](http://www.cybercom.net/~dcoffin/dcraw/).
 * [exiftool](src/exiftool) by Phil Harvey from [https://sno.phy.queensu.ca/~phil/exiftool/](https://sno.phy.queensu.ca/~phil/exiftool/) under [Perl licence](http://dev.perl.org/licenses/)
 * [cjpeg](jpeg-9c) jpeg tools from the [JPEG Club](http://jpegclub.org/)
+
+## Configuration notes
+On the [video-on-demand](https://github.com/awslabs/video-on-demand-on-aws) source bucket, either set a lifecyle policy to transition to glacier (available as an option through the CloudFormation template for setting up video-on-demand) or alternatively to expire after a day.
