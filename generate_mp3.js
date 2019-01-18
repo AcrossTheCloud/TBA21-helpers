@@ -21,7 +21,7 @@ const generateMP3 = async (file) => {
 
 module.exports.handler = async(event) => {
 
-  if (event.srcKey.match(/\.mp.*/) || event.srcKey.match(/\.m4a/)) {
+  if (event.srcKey.match(/\.mp.*/) || event.srcKey.match(/\.m4a/) || event.srcKey.match(/\.mp3/)) {
 
     let filename = await download(event.srcBucket, event.srcKey);
     console.log(filename);
