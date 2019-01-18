@@ -5,7 +5,7 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 
 exports.handler = async (event) => {
 
-  if (event.magic.match(/JPEG/) || event.magic.match(/PNG/)) {
+  if (event.magic.match(/jpeg/) || event.magic.match(/png/)) {
 
     let params = {
         Image: {
