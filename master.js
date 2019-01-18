@@ -23,7 +23,7 @@ module.exports.start = async (event, context, callback) => {
 
   const params = {
     stateMachineArn: process.env.stateMachineArn,
-    input: JSON.stringify({srcBucket: srcBucket, srcKey: srcKey, magic: stdout}),
+    input: JSON.stringify({srcBucket: srcBucket, srcKey: srcKey, magic: stdout.toLowerCase()}),
     name: srcKey+uuid()
   }
 
