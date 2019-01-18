@@ -17,3 +17,6 @@ processing scripts for TBA21:
 
 ## Configuration notes
 On the [video-on-demand](https://github.com/awslabs/video-on-demand-on-aws) source bucket, either set a lifecyle policy to transition to glacier (available as an option through the CloudFormation template for setting up video-on-demand) or alternatively to expire after a day.
+
+## Test files
+* [test_files/colorchart-eos-7d.cr2](test_files/colorchart-eos-7d.cr2) from https://github.com/syoyo/raw-images under CC-BY 4.0 licence.
