@@ -32,7 +32,7 @@ provider:
       Action:
         - "s3:*"
       Resource:
-        - "arn:aws:s3:::oceanarchive-helper-test/*"
+        - "arn:aws:s3:::oceanarchive/*"
         - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si"
         - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si/*"
     - Effect: Allow
@@ -59,7 +59,7 @@ functions:
   master:
     handler: master.start
     events:
-      - s3: oceanarchive-helper-test
+      - s3: oceanarchive
     environment:
       stateMachineArn: ${self:resources.Outputs.TBA21FileProcessorStateMachine.Value}
   generateMP3:
@@ -67,7 +67,7 @@ functions:
   image_tagger:
     handler: image_tagger.handler
     environment:
-      IMAGE_TAG_TABLE: tba21-image-tags-dev
+      IMAGE_TAG_TABLE: tba21-image-tags
   copy_video_for_transcoding:
     handler: copy_for_vid_transcoding.handler
     environment:
@@ -79,7 +79,7 @@ functions:
   exif:
     handler: exif.handler
     environment:
-      IMAGE_EXIF_TABLE: tba21-image-exif-dev
+      IMAGE_EXIF_TABLE: tba21-image-exif
   raw_conversion:
     handler: raw_conversion.handler
 
