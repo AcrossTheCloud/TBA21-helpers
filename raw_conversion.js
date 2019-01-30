@@ -27,7 +27,7 @@ module.exports.handler = async(event) => {
 
   if (event.magic.match(/raw image/)) {
 
-    let filename = await download(event.srcBucket, event.srcKey);
+    let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
     console.log(filename);
     let outputFile = await raw_conversion(filename);
     console.log(outputFile);

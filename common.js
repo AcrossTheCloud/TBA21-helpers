@@ -29,7 +29,7 @@ module.exports.delete_empty_strings = (inputObject) => {
 module.exports.upload = async (filename, bucket) => {
 
   let stream = fs.createReadStream(filename);
-  let put = await s3.putObject({Bucket: bucket, Key: filename.substring(5), Body: stream}).promise();
+  let put = await s3.putObject({Bucket: bucket, Key: filename, Body: stream}).promise();
   return put;
 
 }
