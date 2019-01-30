@@ -8,7 +8,7 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async(event) => {
 
-  let filename = await download(event.srcBucket, event.srcKey);
+  let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
 
 
   let hashes = {};
@@ -23,7 +23,7 @@ module.exports.handler = async(event) => {
     });
   }
 
-  hashes.key = filename.substring(5);
+  hashes.key = event.decodedSrcKey;
 
   hashes.sha512 = await checksumFile('sha512',filename);
   hashes.md5 = await checksumFile('md5',filename);

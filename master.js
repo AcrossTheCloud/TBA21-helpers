@@ -10,9 +10,10 @@ const stepfunctions = new AWS.StepFunctions();
 module.exports.start = async (event, context, callback) => {
   const s3Record = event.Records[0].s3;
   const srcBucket = s3Record.bucket.name;
-  const srcKey = decodeURIComponent(s3Record.object.key.replace(/\+/g, " "));
+  const srcKey = s3Record.object.key; 
+  const decodedSrcKey = decodeURIComponent(s3Record.object.key.replace(/\+/g, " "));
 
-  let filename = await download(srcBucket, srcKey);
+  let filename = await download(srcBucket, srcKey, decodedSrcKey);
 
   const { error, stdout, stderr } = await execFile('file', [filename]);
   if (error) {
@@ -24,7 +25,7 @@ module.exports.start = async (event, context, callback) => {
 
   const params = {
     stateMachineArn: process.env.stateMachineArn,
-    input: JSON.stringify({srcBucket: srcBucket, srcKey: srcKey, magic: stdout.toLowerCase()}),
+    input: JSON.stringify({srcBucket: srcBucket, srcKey: srcKey, decodedSrcKey: decodedSrcKey, magic: stdout.toLowerCase()}),
     name: crypto.createHmac('sha256', srcKey + uuid()).digest('hex')
   }
 

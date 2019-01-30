@@ -23,7 +23,7 @@ module.exports.handler = async(event) => {
 
   if (event.srcKey.match(/\.mp.*/) || event.srcKey.match(/\.m4a/) || event.srcKey.match(/\.mp3/)) {
 
-    let filename = await download(event.srcBucket, event.srcKey);
+    let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
     console.log(filename);
     let outputFile = await generateMP3(filename);
     console.log(outputFile);
