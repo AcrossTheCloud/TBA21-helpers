@@ -34,7 +34,7 @@ use Image::ExifTool::Nikon;
 use Image::ExifTool::Validate;
 use Image::ExifTool::MacOS;
 
-$VERSION = '3.18';
+$VERSION = '3.19';
 @ISA = qw(Exporter);
 
 sub NumbersFirst($$);
@@ -327,12 +327,13 @@ to preserve other existing languages (eg. "XMP-dc:Description-x-default").
 When reading, "x-default" is not specified.
 
 The XMP tags are organized according to schema B<Namespace> in the following
-tables.  In general, the ExifTool family 1 group names are derived from the
-namespace prefixes by adding a leading "XMP-" (eg. "XMP-dc"), but a few of
-the longer prefixes have been shortened for convenience (as mentioned in the
-documentation below).  The tags of any namespace may be deleted as a group
-by specifying the family 1 group name (eg. "-XMP-dc:all=" on the command
-line).  This includes namespaces which are not pre-defined by ExifTool.
+tables.  The ExifTool family 1 group names are derived from the namespace
+prefixes by adding a leading "XMP-" (eg. "XMP-dc").  A few of the longer
+prefixes have been shortened (as mentioned in the documentation below) to
+avoid excessively long ExifTool group names.  The tags of any namespace may
+be deleted as a group by specifying the family 1 group name (eg.
+"-XMP-dc:all=" on the command line).  This includes namespaces which are not
+pre-defined by ExifTool.
 
 In cases where a tag name exists in more than one namespace, less common
 namespaces are avoided when writing.  However, a specific namespace may be
@@ -591,7 +592,7 @@ L<Image::ExifTool::BuildTagLookup|Image::ExifTool::BuildTagLookup>.
 
 ~head1 AUTHOR
 
-Copyright 2003-2018, Phil Harvey (phil at owl.phy.queensu.ca)
+Copyright 2003-2019, Phil Harvey (phil at owl.phy.queensu.ca)
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
@@ -2616,7 +2617,7 @@ List of writable pseudo tags.
 
 =head1 AUTHOR
 
-Copyright 2003-2018, Phil Harvey (phil at owl.phy.queensu.ca)
+Copyright 2003-2019, Phil Harvey (phil at owl.phy.queensu.ca)
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

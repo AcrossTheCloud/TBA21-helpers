@@ -2607,7 +2607,7 @@ sub Sanitize($$)
         if ($$self{OPTIONS}{Escape} eq 'XML') {
             $$valPt = Image::ExifTool::XMP::UnescapeXML($$valPt);
         } elsif ($$self{OPTIONS}{Escape} eq 'HTML') {
-            $$valPt = Image::ExifTool::HTML::UnescapeHTML($$valPt);
+            $$valPt = Image::ExifTool::HTML::UnescapeHTML($$valPt, $$self{OPTIONS}{Charset});
         }
     }
 }
@@ -4487,7 +4487,7 @@ sub InverseDateTime($$;$$)
     my ($self, $val, $tzFlag, $dateOnly) = @_;
     my ($rtnVal, $tz);
     # strip off timezone first if it exists
-    if ($val =~ s/([+-])(\d{1,2}):?(\d{2})\s*$//i) {
+    if ($val =~ s/([+-])(\d{1,2}):?(\d{2})\s*(DST)?$//i) {
         $tz = sprintf("$1%.2d:$3", $2);
     } elsif ($val =~ s/Z$//i) {
         $tz = 'Z';
@@ -6686,7 +6686,7 @@ used routines.
 
 =head1 AUTHOR
 
-Copyright 2003-2018, Phil Harvey (phil at owl.phy.queensu.ca)
+Copyright 2003-2019, Phil Harvey (phil at owl.phy.queensu.ca)
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

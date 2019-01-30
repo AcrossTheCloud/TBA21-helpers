@@ -54,7 +54,7 @@ my %qtFmt = (
 # maximums for validating H,M,S,d,m,Y from "freeGPS " metadata
 my @dateMax = ( 24, 59, 59, 2200, 12, 31 );
 
-# size of freeGPS block
+# typical (minimum?) size of freeGPS block
 my $gpsBlockSize = 0x8000;
 
 # conversion factors
@@ -150,56 +150,58 @@ my %processByMetaFormat = (
     }],
     camm => [{
         Name => 'camm0',
-        Condition => '$$valPt =~ /^\0\0\0\0/',
+        # (according to the spec. the first 2 bytes are reserved and should be zero,
+        # but I have a sample where these bytes are non-zero, so allow anything here)
+        Condition => '$$valPt =~ /^..\0\0/s',
         SubDirectory => {
             TagTable => 'Image::ExifTool::QuickTime::camm0',
             ByteOrder => 'Little-Endian',
         },
     },{
         Name => 'camm1',
-        Condition => '$$valPt =~ /^\0\0\x01\0/',
+        Condition => '$$valPt =~ /^..\x01\0/s',
         SubDirectory => {
             TagTable => 'Image::ExifTool::QuickTime::camm1',
             ByteOrder => 'Little-Endian',
         },
     },{ # (written by Insta360) - [HandlerType, not MetaFormat]
         Name => 'camm2',
-        Condition => '$$valPt =~ /^\0\0\x02\0/',
+        Condition => '$$valPt =~ /^..\x02\0/s',
         SubDirectory => {
             TagTable => 'Image::ExifTool::QuickTime::camm2',
             ByteOrder => 'Little-Endian',
         },
     },{
         Name => 'camm3',
-        Condition => '$$valPt =~ /^\0\0\x03\0/',
+        Condition => '$$valPt =~ /^..\x03\0/s',
         SubDirectory => {
             TagTable => 'Image::ExifTool::QuickTime::camm3',
             ByteOrder => 'Little-Endian',
         },
     },{
         Name => 'camm4',
-        Condition => '$$valPt =~ /^\0\0\x04\0/',
+        Condition => '$$valPt =~ /^..\x04\0/s',
         SubDirectory => {
             TagTable => 'Image::ExifTool::QuickTime::camm4',
             ByteOrder => 'Little-Endian',
         },
     },{
         Name => 'camm5',
-        Condition => '$$valPt =~ /^\0\0\x05\0/',
+        Condition => '$$valPt =~ /^..\x05\0/s',
         SubDirectory => {
             TagTable => 'Image::ExifTool::QuickTime::camm5',
             ByteOrder => 'Little-Endian',
         },
     },{
         Name => 'camm6',
-        Condition => '$$valPt =~ /^\0\0\x06\0/',
+        Condition => '$$valPt =~ /^..\x06\0/s',
         SubDirectory => {
             TagTable => 'Image::ExifTool::QuickTime::camm6',
             ByteOrder => 'Little-Endian',
         },
     },{
         Name => 'camm7',
-        Condition => '$$valPt =~ /^\0\0\x07\0/',
+        Condition => '$$valPt =~ /^..\x07\0/s',
         SubDirectory => {
             TagTable => 'Image::ExifTool::QuickTime::camm7',
             ByteOrder => 'Little-Endian',
@@ -796,10 +798,11 @@ sub ProcessFreeGPS($$$)
 {
     my ($et, $dirInfo, $tagTbl) = @_;
     my $dataPt = $$dirInfo{DataPt};
+    my $dirLen = length $$dataPt;
     my ($yr, $mon, $day, $hr, $min, $sec, $stat, $lbl);
     my ($lat, $latRef, $lon, $lonRef, $spd, $trk, $alt, @acc, @xtra);
 
-    return 0 unless length $$dataPt >= 92;
+    return 0 if $dirLen < 92;
 
     if (substr($$dataPt,12,1) eq "\x05") {
 
@@ -808,7 +811,7 @@ sub ProcessFreeGPS($$$)
         #  0000: 00 00 80 00 66 72 65 65 47 50 53 20 05 01 00 00 [....freeGPS ....]
         #  0010: 01 03 aa aa f2 e1 f0 ee 54 54 98 9a 9b 92 9a 93 [........TT......]
         #  0020: 98 9e 98 98 9e 93 98 92 a6 9f 9f 9c 9d ed fa 8a [................]
-        my $n = length($$dataPt) - 18;
+        my $n = $dirLen - 18;
         $n = 0x101 if $n > 0x101;
         my $buf2 = pack 'C*', map { $_ ^ 0xaa } unpack 'C*', substr($$dataPt,18,$n);
         if ($et->Options('Verbose') > 1) {
@@ -824,7 +827,7 @@ sub ProcessFreeGPS($$$)
         # extract accelerometer data (ref PH)
         @acc = ($1/100,$2/100,$3/100) if $buf2 =~ /^.{173}([-+]\d{3})([-+]\d{3})([-+]\d{3})/s;
 
-    } elsif ($$dataPt =~ /^.{52}(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/) {
+    } elsif ($$dataPt =~ /^.{52}(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/s) {
 
         # decode NMEA-format GPS data (NextBase 512GW dashcam, ref PH)
         # header looks like this in my sample:
@@ -874,7 +877,7 @@ sub ProcessFreeGPS($$$)
 # save tag values extracted by above code
 #
     FoundSomething($et, $tagTbl, $$dirInfo{SampleTime}, $$dirInfo{SampleDuration});
-    # lat/long are in DDDmm.mmmm format
+    # lat/long are in DDDMM.MMMM format
     my $deg = int($lat / 100);
     $lat = $deg + ($lat - $deg * 100) / 60;
     $deg = int($lon / 100);
@@ -884,7 +887,7 @@ sub ProcessFreeGPS($$$)
         my $time = sprintf('%.4d:%.2d:%.2d %.2d:%.2d:%sZ',$yr,$mon,$day,$hr,$min,$sec);
         $et->HandleTag($tagTbl, GPSDateTime => $time);
     } elsif (defined $hr) {
-        my $time = sprintf('%.2d:%.2d:%.2dZ',$hr,$min,$sec);
+        my $time = sprintf('%.2d:%.2d:%sZ',$hr,$min,$sec);
         $et->HandleTag($tagTbl, GPSTimeStamp => $time);
     }
     $et->HandleTag($tagTbl, GPSLatitude  => $lat * ($latRef eq 'S' ? -1 : 1));
@@ -908,17 +911,19 @@ sub ProcessFreeGPS($$$)
 
 #------------------------------------------------------------------------------
 # Process "freeGPS " data blocks _not_ referenced by a 'gps ' atom
-# Inputs: 0) ExifTool ref, 1) dirInfo ref {DataPt,DataPos}, 2) tagTable ref
+# Inputs: 0) ExifTool ref, 1) dirInfo ref {DataPt,DataPos,DirLen}, 2) tagTable ref
 # Returns: 1 on success
 # Notes:
 # - also see ProcessFreeGPS() above
-# - on entry, the length of $$dataPt will be at least $gpsBlockSize bytes long
 sub ProcessFreeGPS2($$$)
 {
     my ($et, $dirInfo, $tagTbl) = @_;
     my $dataPt = $$dirInfo{DataPt};
+    my $dirLen = $$dirInfo{DirLen};
     my ($yr, $mon, $day, $hr, $min, $sec, $pos);
     my ($lat, $latRef, $lon, $lonRef, $spd, $trk, $alt, $ddd, $unk);
+
+    return 0 if $dirLen < 82;   # minimum size of block with a single GPS record
 
     if (substr($$dataPt,0x45,3) eq 'ATC') {
 
@@ -947,7 +952,7 @@ sub ProcessFreeGPS2($$$)
         # block, but I have never seen this.  Note that there may be some earlier
         # GPS records at the end of the first block that we will miss decoding, but
         # these should (I believe) be before the start of the video
-ATCRec: for ($recPos = 0x30; $recPos + 52 < $gpsBlockSize; $recPos += 52) {
+ATCRec: for ($recPos = 0x30; $recPos + 52 < $dirLen; $recPos += 52) {
 
             my $a = substr($$dataPt, $recPos, 52); # isolate a single record
             # decrypt record
@@ -1337,9 +1342,9 @@ sub ScanMovieData($)
         $buff = $buf2 . $buff if length $buf2;
         last if length $buff < $gpsBlockSize;
         # look for "freeGPS " block
-        # (always found on an absolute 0x8000-byte boundary in all of
-        #  my samples, but allow for any alignment when searching)
-        if ($buff !~ /\0\0\x80\0freeGPS /g) {
+        # (found on an absolute 0x8000-byte boundary in all of my samples,
+        #  but allow for any alignment when searching)
+        if ($buff !~ /\0..\0freeGPS /sg) { # (seen ".." = "\0\x80","\x01\0")
             $buf2 = substr($buff,-12);
             $pos += length($buff)-12;
             # in all of my samples the first freeGPS block is within 2 MB of the start
@@ -1359,20 +1364,25 @@ sub ScanMovieData($)
             $pos += pos($buff) - 12;
             $buff = substr($buff, pos($buff) - 12);
         }
-        # make sure we have the full 0x8000-byte freeGPS record
-        my $more = $gpsBlockSize - length($buff);
-        if ($more > 0) {
-            last unless $raf->Read($buf2, $more) == $more;
-            $buff .= $buf2;
+        # make sure we have the full freeGPS record
+        my $len = unpack('N', $buff);
+        if ($len < 12) {
+            $len = 12;
+        } else {
+            my $more = $len - length($buff);
+            if ($more > 0) {
+                last unless $raf->Read($buf2, $more) == $more;
+                $buff .= $buf2;
+            }
+            if ($verbose) {
+                $et->VerboseDir('GPS', undef, $len);
+                $et->VerboseDump(\$buff, DataPos => $pos + $dataPos);
+            }
+            my $dirInfo = { DataPt => \$buff, DataPos => $pos + $dataPos, DirLen => $len };
+            ProcessFreeGPS2($et, $dirInfo, $tagTbl);
         }
-        if ($verbose) {
-            $et->VerboseDir('GPS', undef, $gpsBlockSize);
-            $et->VerboseDump(\$buff, DataPos => $pos + $dataPos);
-        }
-        ProcessFreeGPS2($et, { DataPt => \$buff, DataPos => $pos + $dataPos }, $tagTbl);
-
-        $pos += $gpsBlockSize;
-        $buf2 = substr($buff, $gpsBlockSize);
+        $pos += $len;
+        $buf2 = substr($buff, $len);
     }
     if ($tagTbl) {
         $$et{DOC_NUM} = 0;
@@ -1401,7 +1411,7 @@ information like GPS tracks from MOV and MP4 movie data.
 
 =head1 AUTHOR
 
-Copyright 2003-2018, Phil Harvey (phil at owl.phy.queensu.ca)
+Copyright 2003-2019, Phil Harvey (phil at owl.phy.queensu.ca)
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

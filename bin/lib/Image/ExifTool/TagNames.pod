@@ -115,6 +115,7 @@ L<https://www.w3.org/Graphics/JPEG/jfif3.pdf> for the JPEG specification.
                FPXR                             FlashPix
                PreviewImage                     no
   'APP5'       RMETA                            Ricoh RMETA
+               SamsungUniqueID                  Samsung APP5
                PreviewImage                     no
   'APP6'       EPPIM                            JPEG EPPIM
                NITF                             JPEG NITF
@@ -490,7 +491,7 @@ official EXIF 2.31 specification.
   0x82aa   MDPrepDate                -          no
   0x82ab   MDPrepTime                -          no
   0x82ac   MDFileUnits               -          no
-  0x830e   PixelScale                -          no
+  0x830e   PixelScale                ExifIFD    double[3]
   0x8335   AdventScale               -          no
   0x8336   AdventRevision            -          no
   0x835c   UIC1Tag                   -          no
@@ -500,9 +501,9 @@ official EXIF 2.31 specification.
   0x83bb   IPTC-NAA                  IFD0       IPTC
   0x847e   IntergraphPacketData      -          no
   0x847f   IntergraphFlagRegisters   -          no
-  0x8480   IntergraphMatrix          -          no
+  0x8480   IntergraphMatrix          ExifIFD    double[n]
   0x8481   INGRReserved              -          no
-  0x8482   ModelTiePoint             -          no
+  0x8482   ModelTiePoint             ExifIFD    double[n]
   0x84e0   Site                      -          no
   0x84e1   ColorSequence             -          no
   0x84e2   IT8Header                 -          no
@@ -524,7 +525,7 @@ official EXIF 2.31 specification.
   0x8568   AFCP_IPTC                 -          IPTC
   0x85b8   PixelMagicJBIGOptions     -          no
   0x85d7   JPLCartoIFD               -          no
-  0x85d8   ModelTransform            -          no
+  0x85d8   ModelTransform            ExifIFD    double[16]
   0x8602   WB_GRGBLevels             -          no
   0x8606   LeafData                  -          Leaf
   0x8649   PhotoshopSettings         IFD0       Photoshop
@@ -648,6 +649,7 @@ official EXIF 2.31 specification.
            MakerNoteLeica7           ExifIFD    Panasonic Leica6
            MakerNoteLeica8           ExifIFD    Panasonic Leica5
            MakerNoteLeica9           ExifIFD    Panasonic Leica9
+           MakerNoteLeica10          ExifIFD    Panasonic
            MakerNotePanasonic        ExifIFD    Panasonic
            MakerNotePanasonic2       ExifIFD    Panasonic Type2
            MakerNotePanasonic3       ExifIFD    Panasonic
@@ -880,6 +882,7 @@ official EXIF 2.31 specification.
   0xc7a8   RawToPreviewGain          IFD0       double!
   0xc7aa   CacheVersion              SubIFD2    int32u!
   0xc7b5   DefaultUserCrop           SubIFD     rational64u[4]!
+  0xc7d5   NikonNEFInfo              -          Nikon NEFInfo
   0xea1c   Padding                   ExifIFD    undef!
   0xea1d   OffsetSchema              ExifIFD    int32s!
   0xfde8   OwnerName                 ExifIFD    string/
@@ -1186,12 +1189,13 @@ to preserve other existing languages (eg. "XMP-dc:Description-x-default").
 When reading, "x-default" is not specified.
 
 The XMP tags are organized according to schema B<Namespace> in the following
-tables.  In general, the ExifTool family 1 group names are derived from the
-namespace prefixes by adding a leading "XMP-" (eg. "XMP-dc"), but a few of
-the longer prefixes have been shortened for convenience (as mentioned in the
-documentation below).  The tags of any namespace may be deleted as a group
-by specifying the family 1 group name (eg. "-XMP-dc:all=" on the command
-line).  This includes namespaces which are not pre-defined by ExifTool.
+tables.  The ExifTool family 1 group names are derived from the namespace
+prefixes by adding a leading "XMP-" (eg. "XMP-dc").  A few of the longer
+prefixes have been shortened (as mentioned in the documentation below) to
+avoid excessively long ExifTool group names.  The tags of any namespace may
+be deleted as a group by specifying the family 1 group name (eg.
+"-XMP-dc:all=" on the command line).  This includes namespaces which are not
+pre-defined by ExifTool.
 
 In cases where a tag name exists in more than one namespace, less common
 namespaces are avoided when writing.  However, a specific namespace may be
@@ -2322,7 +2326,7 @@ These tags belong to the ExifTool XMP-getty family 1 group.
   OriginalFileName                              string
   ParentMediaEventID                            string
   ParentMEID                                    string
-  Personality                                   string
+  Personality                                   string+
   PrimaryFTP                                    string+
   RoutingDestinations                           string+
   RoutingExclusions                             string+
@@ -10747,6 +10751,8 @@ DiMAGE X and Xt.
   0x0022   ActiveD-Lighting                     int16u
   0x0023   PictureControlData                   Nikon PictureControl
                                                 Nikon PictureControl2
+                                                Nikon PictureControl3
+                                                Nikon PictureControlUnknown
   0x0024   WorldTime                            Nikon WorldTime
   0x0025   ISOInfo                              Nikon ISOInfo
   0x002a   VignetteControl                      int16u
@@ -10822,6 +10828,9 @@ DiMAGE X and Xt.
            LensData0201                         Nikon LensData01
            LensData0204                         Nikon LensData0204
            LensData0400                         Nikon LensData0400
+           LensData0402                         Nikon LensData0402
+           LensData0403                         Nikon LensData0403
+           LensData0800                         Nikon LensData0800
            LensDataUnknown                      Nikon LensDataUnknown
   0x0099   RawImageCenter                       int16u[2]
   0x009a   SensorPixelSize                      rational64u[2]
@@ -10991,6 +11000,32 @@ Color balance tags used by the P1000, P7000, P7100 and B700.
      63    FilterEffect                         int8u
      64    ToningEffect                         int8u
      65    ToningSaturation                     int8u
+
+=head3 Nikon PictureControl3 Tags
+
+  Index1   Tag Name                             Writable
+  ------   --------                             --------
+      0    PictureControlVersion                no
+      8    PictureControlName                   string[20]
+     28    PictureControlBase                   string[20]
+     54    PictureControlAdjust                 int8u
+     55    PictureControlQuickAdjust            int8u
+     57    Sharpness                            int8u
+     59    MidRangeSharpness                    int8u
+     61    Clarity                              int8u
+     63    Contrast                             int8u
+     65    Brightness                           int8u
+     67    Saturation                           int8u
+     69    Hue                                  int8u
+     71    FilterEffect                         int8u
+     72    ToningEffect                         int8u
+     73    ToningSaturation                     int8u
+
+=head3 Nikon PictureControlUnknown Tags
+
+  Index1   Tag Name                             Writable
+  ------   --------                             --------
+      0    PictureControlVersion                no
 
 =head3 Nikon WorldTime Tags
 
@@ -11495,12 +11530,54 @@ extracted.
 
 =head3 Nikon LensData0400 Tags
 
-Tags extracted from the encrypted lens data of Nikon 1 models.
+Tags extracted from the encrypted lens data of the Nikon 1J1/1V1/1J2.
 
   Index1   Tag Name                             Writable
   ------   --------                             --------
       0    LensDataVersion                      no
     394    LensModel                            string[64]
+
+=head3 Nikon LensData0402 Tags
+
+Tags extracted from the encrypted lens data of the Nikon 1J3/1S1/1V2.
+
+  Index1   Tag Name                             Writable
+  ------   --------                             --------
+      0    LensDataVersion                      no
+    395    LensModel                            string[64]
+
+=head3 Nikon LensData0403 Tags
+
+Tags extracted from the encrypted lens data of the Nikon 1J4/1J5.
+
+  Index1   Tag Name                             Writable
+  ------   --------                             --------
+      0    LensDataVersion                      no
+    684    LensModel                            string[64]
+
+=head3 Nikon LensData0800 Tags
+
+Tags found in the encrypted LensData from cameras such as the Z6 and Z7.
+
+  Index1   Tag Name                             Writable
+  ------   --------                             --------
+      0    LensDataVersion                      no
+      4    ExitPupilPosition                    int8u
+      5    AFAperture                           int8u
+      9    FocusPosition                        int8u
+     11    FocusDistance                        int8u
+     12    FocalLength                          int8u
+     13    LensIDNumber                         int8u
+     14    LensFStops                           int8u
+     15    MinFocalLength                       int8u
+     16    MaxFocalLength                       int8u
+     17    MaxApertureAtMinFocal                int8u
+     18    MaxApertureAtMaxFocal                int8u
+     19    MCUVersion                           int8u
+     20    EffectiveMaxAperture                 int8u
+     54    MaxAperture                          int16u
+     56    FNumber                              int16u
+     60    FocalLength                          int16u
 
 =head3 Nikon LensDataUnknown Tags
 
@@ -11687,6 +11764,7 @@ These tags are written by Nikon DSLR's which have the live view feature.
            AFPointsUsed                         undef[21]
            AFPointsUsed                         undef[29]
            AFPointsUsed                         undef[20]
+           AFPointsUsed                         undef[62]
            AFPointsUsed                         undef[7]
      16    AFImageWidth                         int16u
      18    AFImageHeight                        int16u
@@ -11695,6 +11773,12 @@ These tags are written by Nikon DSLR's which have the live view feature.
      24    AFAreaWidth                          int16u
      26    AFAreaHeight                         int16u
      28    ContrastDetectAFInFocus              int8u
+     42    AFImageWidth                         int16u
+     44    AFImageHeight                        int16u
+     46    AFAreaXPosition                      int16u
+     48    AFAreaYPosition                      int16u
+     50    AFAreaWidth                          int16u
+     52    AFAreaHeight                         int16u
      68    PrimaryAFPoint                       int8u
      70    AFImageWidth                         int16u
      72    AFImageHeight                        int16u
@@ -11795,6 +11879,15 @@ This information is written by the Nikon Scan software.
   0x000a   DigitalZoom                          yes
   0x000b   Converter                            yes
 
+=head3 Nikon NEFInfo Tags
+
+As-yet unknown information found in SubIFD1 tag 0xc7d5 of NEF images from
+cameras such as the Z6 and Z7, and NRW images from some Coolpix cameras.
+
+  Tag ID   Tag Name                             Writable
+  ------   --------                             --------
+  [no tags known]
+
 =head3 Nikon NCDT Tags
 
 Nikon-specific QuickTime tags found in the NCDT atom of MOV videos from
@@ -11872,6 +11965,8 @@ videos from some Nikon cameras.
   0x2000022    ActiveD-Lighting                 int16u
   0x2000023    PictureControlData               Nikon PictureControl
                                                 Nikon PictureControl2
+                                                Nikon PictureControl3
+                                                Nikon PictureControlUnknown
   0x2000024    WorldTime                        Nikon WorldTime
   0x2000025    ISOInfo                          Nikon ISOInfo
   0x200002a    VignetteControl                  int16u
@@ -11886,6 +11981,9 @@ videos from some Nikon cameras.
                LensData0201                     Nikon LensData01
                LensData0204                     Nikon LensData0204
                LensData0400                     Nikon LensData0400
+               LensData0402                     Nikon LensData0402
+               LensData0403                     Nikon LensData0403
+               LensData0800                     Nikon LensData0800
                LensDataUnknown                  Nikon LensDataUnknown
   0x20000a7    ShutterCount                     no
   0x20000a8    FlashInfo0100                    Nikon FlashInfo0100
@@ -15323,6 +15421,12 @@ Camera orientation information written by the Gear 360 (SM-C200).
       3    PictureWizardSharpness               int16u
       4    PictureWizardContrast                int16u
 
+=head3 Samsung APP5 Tags
+
+  Tag ID               Tag Name                 Writable
+  ------               --------                 --------
+  'ssuniqueid'         UniqueID                 no
+
 =head3 Samsung Trailer Tags
 
 Tags extracted from the trailer of JPEG images written when using certain
@@ -15758,6 +15862,7 @@ MakerNotes.
   0x9400   Tag9400a                             Sony Tag9400a
            Tag9400b                             Sony Tag9400b
            Tag9400c                             Sony Tag9400c
+  0x9401   Tag9401                              Sony Tag9401
   0x9402   Tag9402                              Sony Tag9402
   0x9403   Tag9403                              Sony Tag9403
   0x9404   Tag9404a                             Sony Tag9404a
@@ -16629,7 +16734,7 @@ ILCE-6300/6500/7RM2/7SM2, ILCA-99M2.
 
 =head3 Sony Tag2010i Tags
 
-Valid for ILCE-7M3/7RM3/9, DSC-RX10M4/RX100M6/RX100M5A/HX99.
+Valid for ILCE-6400/7M3/7RM3/9, DSC-RX10M4/RX100M6/RX100M5A/HX99.
 
   Tag ID   Tag Name                             Writable
   ------   --------                             --------
@@ -16767,11 +16872,11 @@ substitution cipher, but the deciphered values are listed below.
   0x0000   SonyMaxAperture                      int8u
   0x0001   SonyMinAperture                      int8u
   0x0031   FlashStatus                          int8u
-  0x0032   ImageCount                           int32u
+  0x0032   ShutterCount                         int32u
   0x003a   SonyExposureTime                     int16u
   0x003c   SonyFNumber                          int16u
   0x003f   ReleaseMode2                         int8u
-  0x004c   ImageCount2                          int32u
+  0x004c   ShutterCount2                        int32u
   0x0051   SonyDateTime2                        undef[6]
   0x0067   ReleaseMode2                         int8u
   0x007c   InternalSerialNumber                 int8u[4]~
@@ -16783,26 +16888,31 @@ substitution cipher, but the deciphered values are listed below.
   0x010b   DistortionCorrParamsPresent          int8u
   0x0115   LensSpecFeatures                     undef[2]
   0x0116   LensSpecFeatures                     undef[2]
-  0x01a0   ImageCount3                          int32u
-  0x01aa   ImageCount3                          int32u
-  0x01bd   ImageCount3                          int32u
+  0x01a0   ShutterCount3                        int32u
+  0x01aa   ShutterCount3                        int32u
+  0x01bd   ShutterCount3                        int32u
 
 =head3 Sony Tag9050b Tags
 
-Valid from July 2015 for ILCE-6300/6500/7M3/7RM2/7RM3/7SM2/9, ILCA-99M2.
+Valid from July 2015 for ILCE-6300/6400/6500/7M3/7RM2/7RM3/7SM2/9,
+ILCA-99M2.
 
   Tag ID   Tag Name                             Writable
   ------   --------                             --------
   0x0000   SonyMaxAperture                      int8u
   0x0001   SonyMinAperture                      int8u
+  0x002c   Shutter                              int8u
   0x0039   FlashStatus                          int8u
-  0x003a   ImageCount                           int32u
+  0x003a   ShutterCount                         int32u
   0x0046   SonyExposureTime                     int16u
   0x0048   SonyFNumber                          int16u
   0x004b   ReleaseMode2                         int8u
-  0x0052   ImageCount2                          int32u~
-  0x0058   ImageCount2                          int32u
+  0x0050   ShutterCount2                        int32u~
+  0x0052   ShutterCount2                        int32u~
+  0x0058   ShutterCount2                        int32u
   0x0061   SonyTimeMinSec                       no
+  0x006b   ReleaseMode2                         int8u
+  0x006d   ReleaseMode2                         int8u
   0x0073   ReleaseMode2                         int8u
   0x0088   InternalSerialNumber                 int8u[6]~
   0x0105   LensMount                            int8u
@@ -16811,9 +16921,9 @@ Valid from July 2015 for ILCE-6300/6500/7M3/7RM2/7RM3/7SM2/9, ILCA-99M2.
   0x0109   LensType                             int16u
   0x010b   DistortionCorrParamsPresent          int8u
   0x0116   LensSpecFeatures                     undef[2]
-  0x019f   ImageCount3                          int32u
-  0x01cb   ImageCount3                          int32u
-  0x01cd   ImageCount3                          int32u
+  0x019f   ShutterCount3                        int32u
+  0x01cb   ShutterCount3                        int32u
+  0x01cd   ShutterCount3                        int32u
   0x021c   LensSpecFeatures                     undef[2]
   0x021e   LensSpecFeatures                     undef[2]
 
@@ -16856,8 +16966,8 @@ DSC-HX50V, DSC-QX10/QX100.
 
 Valid for DSC-HX60V/HX80/HX90V/HX99/HX350/HX400V/QX30/RX0/RX1RM2/RX10/
 RX10M2/RX10M3/RX10M4/RX100M3/RX100M4/RX100M5/RX100M5A/RX100M6/WX220/WX350/
-WX500, ILCE-7/7R/7S/7M2/7M3/7RM2/7RM3/7SM2/9/5000/5100/6000/6300/6500/QX1,
-ILCA-68/77M2/99M2.
+WX500, ILCE-7/7R/7S/7M2/7M3/7RM2/7RM3/7SM2/9/5000/5100/6000/6300/6400/6500/
+QX1, ILCA-68/77M2/99M2.
 
   Tag ID   Tag Name                             Writable
   ------   --------                             --------
@@ -16872,6 +16982,28 @@ ILCA-68/77M2/99M2.
   0x002a   Quality2                             int8u
   0x0047   SonyImageHeight                      int16u~
   0x0053   ModelReleaseYear                     int8u~
+
+=head3 Sony Tag9401 Tags
+
+  Tag ID   Tag Name                             Writable
+  ------   --------                             --------
+  0x059d   ISOInfo                              Sony ISOInfo
+  0x0634   ISOInfo                              Sony ISOInfo
+  0x0636   ISOInfo                              Sony ISOInfo
+  0x064c   ISOInfo                              Sony ISOInfo
+  0x0653   ISOInfo                              Sony ISOInfo
+  0x0678   ISOInfo                              Sony ISOInfo
+  0x06b8   ISOInfo                              Sony ISOInfo
+  0x06de   ISOInfo                              Sony ISOInfo
+  0x06e7   ISOInfo                              Sony ISOInfo
+
+=head3 Sony ISOInfo Tags
+
+  Index1   Tag Name                             Writable
+  ------   --------                             --------
+      0    ISOSetting                           int8u
+      2    ISOAutoMin                           int8u
+      4    ISOAutoMax                           int8u
 
 =head3 Sony Tag9402 Tags
 
@@ -17502,6 +17634,7 @@ still proprietary) Adobe format.
            MakerNoteLeica7                      Panasonic Leica6
            MakerNoteLeica8                      Panasonic Leica5
            MakerNoteLeica9                      Panasonic Leica9
+           MakerNoteLeica10                     Panasonic
            MakerNotePanasonic                   Panasonic
            MakerNotePanasonic2                  Panasonic Type2
            MakerNotePanasonic3                  Panasonic
@@ -22467,6 +22600,28 @@ decode any tags found in the image.
   'signature'          Signature                no
   'units'              Units                    no
   'white-point'        WhitePoint               no
+
+=head2 PCX Tags
+
+Tags extracted from PC Paintbrush images.
+
+  Index1   Tag Name                             Writable
+  ------   --------                             --------
+      0    Manufacturer                         no
+      1    Software                             no
+      2    Encoding                             no
+      3    BitsPerPixel                         no
+      4    LeftMargin                           no
+      6    TopMargin                            no
+      8    ImageWidth                           no
+     10    ImageHeight                          no
+     12    XResolution                          no
+     14    YResolution                          no
+     65    ColorPlanes                          no
+     66    BytesPerLine                         no
+     68    ColorMode                            no
+     70    ScreenWidth                          no
+     72    ScreenHeight                         no
 
 =head2 PGF Tags
 
@@ -33036,6 +33191,7 @@ for more details.
                        MakerNoteLeica7
                        MakerNoteLeica8
                        MakerNoteLeica9
+                       MakerNoteLeica10
                        MakerNotePanasonic
                        MakerNotePanasonic2
                        MakerNotePanasonic3
@@ -33359,7 +33515,7 @@ L<Image::ExifTool::BuildTagLookup|Image::ExifTool::BuildTagLookup>.
 
 =head1 AUTHOR
 
-Copyright 2003-2018, Phil Harvey (phil at owl.phy.queensu.ca)
+Copyright 2003-2019, Phil Harvey (phil at owl.phy.queensu.ca)
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
