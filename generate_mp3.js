@@ -24,7 +24,7 @@ module.exports.handler = async(event) => {
   if (event.srcKey.match(/\.mp.*/) || event.srcKey.match(/\.m4a/) || event.srcKey.match(/\.mp3/)) {
 
     let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
-    let uploadKey = event.decodedSrcKey.substring(0, file.lastIndexOf('.')) + '_Alexa_audio.mp3';
+    let uploadKey = event.decodedSrcKey.substring(0, event.decodedSrcKey.lastIndexOf('.')) + '_Alexa_audio.mp3';
     console.log(filename);
     let outputFile = await generateMP3(filename);
     console.log(outputFile);
