@@ -31,9 +31,10 @@ module.exports.handler = async(event) => {
     console.log(filename);
     let outputFile = await raw_conversion(filename);
     console.log(outputFile);
+    let uploadKey = event.decodedSrcKey.substring(0, file.lastIndexOf('.')) + '.jpg';
 
     if (outputFile) {
-      let put = await upload(outputFile,event.srcBucket);
+      let put = await upload(outputFile,uploadKey,event.srcBucket);
       return put;
     } else {
       return '';
