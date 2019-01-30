@@ -10,7 +10,7 @@ module.exports.handler = async (event) => {
 
   if (event.magic.match(/image/) || event.srcKey.toLowerString().match(/\.hei[cf]$/)) {
     
-    let filename = await download(event.srcBucket, event.srcKey);
+    let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
     const emitter = exifDB.create({
       media: '/tmp',
       database: '/tmp/exif.json'
@@ -26,7 +26,7 @@ module.exports.handler = async (event) => {
 
     let putParams = {
       TableName: process.env.IMAGE_EXIF_TABLE,
-      Item: {"key": event.srcKey, "exif": exif}
+      Item: {"key": event.decodedSrcKey, "exif": exif}
     };
 
     let dynamoDBdata = await docClient.put(putParams).promise();
