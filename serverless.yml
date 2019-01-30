@@ -64,8 +64,8 @@ functions:
       stateMachineArn: ${self:resources.Outputs.TBA21FileProcessorStateMachine.Value}
   generateMP3:
     handler: generate_mp3.handler
-  image_tagger:
-    handler: image_tagger.handler
+  copy_for_rekognition:
+    handler: copy_for_rekognition.handler
     environment:
       IMAGE_TAG_TABLE: tba21-image-tags
   copy_video_for_transcoding:
@@ -100,11 +100,11 @@ stepFunctions:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-generateMP3
                   End: true
-            - StartAt: image_tagger
+            - StartAt: copy_for_rekognition
               States:
                 image_tagger:
                   Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
+                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_for_rekognition
                   End: true
             - StartAt: hashes
               States:
