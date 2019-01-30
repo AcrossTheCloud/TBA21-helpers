@@ -20,7 +20,7 @@ service: TBA21-helpers # NOTE: update this with your service name
 provider:
   name: aws
   runtime: nodejs8.10
-  region: eu-west-1
+  region: eu-central-1
   timeout: 300
   iamRoleStatements:
     - Effect: "Allow"
