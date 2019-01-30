@@ -29,7 +29,7 @@ module.exports.handler = async(event) => {
     console.log(outputFile);
 
     if (outputFile) {
-      let put = await upload(outputFile,event.srcBucket);
+      let put = await upload(outputFile,process.env.ALEXA_AUDIO_BUCKET);
       return put;
     } else {
       return '';
