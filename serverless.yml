@@ -65,7 +65,7 @@ functions:
   generateMP3:
     handler: generate_mp3.handler
     environment:
-      ALEXA_AUDIO_BUCKET: oceanarchive-alexa-audio
+      ALEXA_AUDIO_BUCKET: oceanarchive-alexa-audio-dev
   image_tagger:
     handler: image_tagger.handler
     environment:
