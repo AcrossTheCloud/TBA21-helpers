@@ -3,6 +3,7 @@ const uuid = require('uuid/v1');
 const util = require('util');
 const execFile = util.promisify(require('child_process').execFile);
 const download = require('./common').download;
+const crypto = require('crypto');
 
 const stepfunctions = new AWS.StepFunctions();
 
@@ -24,7 +25,7 @@ module.exports.start = async (event, context, callback) => {
   const params = {
     stateMachineArn: process.env.stateMachineArn,
     input: JSON.stringify({srcBucket: srcBucket, srcKey: srcKey, magic: stdout.toLowerCase()}),
-    name: srcKey+uuid()
+    name: crypto.createHmac('sha256', srcKey + uuid()).digest('hex')
   }
 
   return stepfunctions.startExecution(params).promise().then(() => {
