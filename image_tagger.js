@@ -20,14 +20,16 @@ exports.handler = async (event) => {
 
     let rekognitionData = await rekognition.detectLabels(params).promise();
     
-    let requestData = {"key": event.decodedSrcKey, "labels": rekognitionData.Labels };
+    if (rekognitionData.Labels.length > 0) {
+      let requestData = {"key": event.decodedSrcKey, "labels": rekognitionData.Labels };
 
-    let putParams = {
-      TableName: process.env.IMAGE_TAG_TABLE,
-      Item: requestData
-    };
+      let putParams = {
+        TableName: process.env.IMAGE_TAG_TABLE,
+        Item: requestData
+      };
 
-    let dynamoDBdata = await docClient.put(putParams).promise();
-    console.log(dynamoDBdata);
+      let dynamoDBdata = await docClient.put(putParams).promise();
+      console.log(dynamoDBdata);
+    }
   }
 }
