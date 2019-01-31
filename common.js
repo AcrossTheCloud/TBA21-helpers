@@ -17,7 +17,7 @@ module.exports.download = async (srcBucket, srcKey, decodedSrcKey) => {
   });
   let done = await end;
   console.log(done);
-  return filename;
+  return '/tmp/'+filename;
 }
 
 module.exports.delete_empty_strings = (inputObject) => {
