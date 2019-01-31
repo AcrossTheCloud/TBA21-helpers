@@ -32,7 +32,11 @@ provider:
       Action:
         - "s3:*"
       Resource:
+<<<<<<< HEAD
         - "arn:aws:s3:::oceanarchive/*"
+=======
+        - "arn:aws:s3:::oceanarchive*/*"
+>>>>>>> dev
         - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si"
         - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si/*"
     - Effect: Allow
@@ -64,8 +68,13 @@ functions:
       stateMachineArn: ${self:resources.Outputs.TBA21FileProcessorStateMachine.Value}
   generateMP3:
     handler: generate_mp3.handler
+    environment:
+      ALEXA_AUDIO_BUCKET: oceanarchive-alexa-audio-dev
   copy_for_rekognition:
     handler: copy_for_rekognition.handler
+
+  image_tagger:
+    handler: image_tagger.handler
     environment:
       IMAGE_TAG_TABLE: tba21-image-tags
   copy_video_for_transcoding:

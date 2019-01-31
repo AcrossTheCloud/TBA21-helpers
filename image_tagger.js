@@ -11,7 +11,7 @@ exports.handler = async (event) => {
         Image: {
             S3Object: {
                 Bucket: event.srcBucket,
-                Name: event.srcKey
+                Name: event.decodedSrcKey
             }
         },
         MaxLabels: 10,
