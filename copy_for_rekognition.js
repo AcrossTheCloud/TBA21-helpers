@@ -5,6 +5,7 @@ exports.handler = async (event) => {
   console.log(event.magic);
 
   if (event.magic.match(/jpeg/) || event.magic.match(/png/)) {
+    console.log('copying');
     const params = {
       Bucket: process.env.REKOGNITION_BUCKET,
       CopySource: `/${event.srcBucket}/${event.decodedSrcKey}`,
