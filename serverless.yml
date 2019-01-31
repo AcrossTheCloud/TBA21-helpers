@@ -68,6 +68,8 @@ functions:
       ALEXA_AUDIO_BUCKET: oceanarchive-alexa-audio
   copy_for_rekognition:
     handler: copy_for_rekognition.handler
+    environment:
+      REKOGNITION_BUCKET: oceanarchive-rekognition
   image_tagger:
     handler: image_tagger.handler
     environment:
