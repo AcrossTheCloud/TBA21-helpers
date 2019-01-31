@@ -106,7 +106,7 @@ stepFunctions:
                   End: true
             - StartAt: copy_for_rekognition
               States:
-                image_tagger:
+                copy_for_rekognition:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_for_rekognition
                   End: true
