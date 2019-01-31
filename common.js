@@ -12,10 +12,11 @@ module.exports.download = async (srcBucket, srcKey, decodedSrcKey) => {
   let fd = s3.getObject({ Bucket: srcBucket, Key: decodedSrcKey }).createReadStream();
   fd.pipe(file);
   let end = new Promise(function(resolve, reject) {
-    fd.on('end', ()=>resolve('/tmp/'+decodedSrcKey.replace(' ','_')));
+    fd.on('end', ()=>resolve('done'));
     fd.on('error', reject); // or something like that
   });
-  let filename = await end;
+  let done = await end;
+  console.log(done);
   return filename;
 }
 
