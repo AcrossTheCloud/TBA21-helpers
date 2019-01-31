@@ -8,7 +8,7 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
 
-  if (event.magic.match(/image/) || event.srcKey.toLowerString().match(/\.hei[cf]$/)) {
+  if (event.magic.match(/image/) || event.decodedSrcKey.toLowerCase().match(/\.hei[cf]$/)) {
     
     let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
     const emitter = exifDB.create({
