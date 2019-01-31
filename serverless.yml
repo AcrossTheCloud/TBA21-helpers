@@ -58,8 +58,6 @@ plugins:
 functions:
   master:
     handler: master.start
-    events:
-      - s3: oceanarchive
     environment:
       stateMachineArn: ${self:resources.Outputs.TBA21FileProcessorStateMachine.Value}
   generateMP3:
