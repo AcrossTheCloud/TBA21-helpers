@@ -4,11 +4,11 @@ const s3 = new AWS.S3();
 
 module.exports.download = async (srcBucket, srcKey, decodedSrcKey) => {
 
-  let file = fs.createWriteStream('/tmp/'+srcKey, {encoding: null});
+  let file = fs.createWriteStream('/tmp/'+decodedSrcKey, {encoding: null});
   let fd = s3.getObject({ Bucket: srcBucket, Key: decodedSrcKey }).createReadStream();
   fd.pipe(file);
   let end = new Promise(function(resolve, reject) {
-    fd.on('end', ()=>resolve('/tmp/'+srcKey));
+    fd.on('end', ()=>resolve('/tmp/'+decodedSrcKey.replace(' ','_')));
     fd.on('error', reject); // or something like that
   });
   let filename = await end;
