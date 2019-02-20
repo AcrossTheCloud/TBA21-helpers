@@ -123,12 +123,6 @@ stepFunctions:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
                   End: true
-            - StartAt: video_transcode_starter
-              States:
-                video_transcode_starter:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_video_for_transcoding
-                  End: true
             - StartAt: exif
               States:
                 exif:
