@@ -38,6 +38,8 @@ provider:
         - "arn:aws:s3:::oceanarchive"
         - "arn:aws:s3:::oceanarchive-rekognition/*"
         - "arn:aws:s3:::oceanarchive-rekognition"
+        - "arn:aws:s3:::tba21-academy/*"
+        - "arn:aws:s3:::tba21-academy"
         - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si"
         - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si/*"
     - Effect: Allow
