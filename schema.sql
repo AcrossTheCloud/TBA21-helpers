@@ -11,7 +11,7 @@ CREATE EXTENSION postgis_topology;
 CREATE extension pgcrypto;
 
 -- Events table
-CREATE TABLE tba21.images
+CREATE TABLE tba21.imagemetadata
 (
   id bigserial PRIMARY KEY,
   decodedSrcKey varchar,
@@ -21,5 +21,5 @@ CREATE TABLE tba21.images
 );
 
 -- Events geometry
-SELECT AddGeometryColumn ('tba21','images','the_geom',4326,'POINT',2);
+SELECT AddGeometryColumn ('tba21','imagemetadata','the_geom',4326,'POINT',2);
 ALTER TABLE tba21.images ALTER COLUMN the_geom SET NOT NULL;
