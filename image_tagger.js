@@ -1,7 +1,6 @@
 const AWS = require('aws-sdk');
 
 const rekognition = new AWS.Rekognition();
-//const docClient = new AWS.DynamoDB.DocumentClient();
 const pgp = require('pg-promise')();
 
 const cn = `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}?ssl=${process.env.PGSSL}`;
@@ -31,8 +30,7 @@ exports.handler = async (event) => {
     if (rekognitionData.Labels.length > 0) {
       let requestData = { "key": event.decodedSrcKey, "labels": rekognitionData.Labels };
 
-      //let dynamoDBdata = await docClient.put(putParams).promise();
-      console.log(dynamoDBdata);
+
       // Setup query
       let query = `INSERT INTO ${process.env.IMAGE_TAG_TABLE}
               (decodedsrckey,created_at, updated_at, metadata, the_geom)
