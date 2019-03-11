@@ -62,7 +62,13 @@ functions:
   image_tagger:
     handler: image_tagger.handler
     environment:
-      IMAGE_TAG_TABLE: tba21-image-tags
+      IMAGE_TAG_TABLE: tba21.imagesmetadata
+      PGUSER: ${file(./secrets.json):PGUSER}
+      PGPASSWORD: ${file(./secrets.json):PGPASSWORD}
+      PGHOST: ${file(./secrets.json):PGHOST}
+      PGPORT: ${file(./secrets.json):PGPORT} 
+      PGDATABASE: ${file(./secrets.json):PGDATABASE}
+      PGSSL: ${file(./secrets.json):PGSSL}
   copy_video_for_transcoding:
     handler: copy_for_vid_transcoding.handler
     environment:
