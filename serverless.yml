@@ -20,8 +20,8 @@ service: TBA21-helpers # NOTE: update this with your service name
 provider:
   name: aws
   runtime: nodejs8.10
-  region: eu-central-1
-  stage: prod
+  region: ${env:REGION, eu-central-1}
+  stage: ${env:STAGE, prod}
   timeout: 900
   memorySize: 256
   iamRoleStatements:
@@ -34,24 +34,8 @@ provider:
       Action:
         - "s3:*"
       Resource:
-        - "arn:aws:s3:::oceanarchive/*"
-        - "arn:aws:s3:::oceanarchive"
-        - "arn:aws:s3:::oceanarchive-rekognition/*"
-        - "arn:aws:s3:::oceanarchive-rekognition"
-        - "arn:aws:s3:::tba21-academy/*"
-        - "arn:aws:s3:::tba21-academy"
-        - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si"
-        - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si/*"
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource:
-        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/tba21*"
+        - "arn:aws:s3:::tba21-helpers-test/*"
+        - "arn:aws:s3:::tba21-helpers-test"
     - Effect: Allow
       Action:
         - rekognition:DetectLabels
@@ -105,18 +89,6 @@ stepFunctions:
             Type: Parallel
             Next: Final State
             Branches:
-            - StartAt: generateMP3
-              States:
-                generateMP3:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-generateMP3
-                  End: true
-            - StartAt: copy_for_rekognition
-              States:
-                copy_for_rekognition:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_for_rekognition
-                  End: true
             - StartAt: hashes
               States:
                 hashes:
