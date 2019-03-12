@@ -1828,8 +1828,11 @@ sub SetFileName($$;$$$)
     # don't replace existing file
     if ($self->Exists($newName) and (not defined $usedFlag or $usedFlag)) {
         if ($file ne $newName or $opt eq 'Link') {
-            $self->Warn("File '${newName}' already exists");
-            return -1;
+            # allow for case-insensitive filesystem
+            if ($opt eq 'Link' or not $self->IsSameFile($file, $newName)) {
+                $self->Warn("File '${newName}' already exists");
+                return -1;
+            }
         } else {
             $self->Warn('File name is unchanged');
             return 0;
@@ -3106,6 +3109,33 @@ sub IsWritable($)
 }
 
 #------------------------------------------------------------------------------
+# Check to see if these are the same file
+# Inputs: 0) ExifTool ref, 1) first file name, 2) second file name
+# Returns: true if file names reference the same file
+sub IsSameFile($$$)
+{
+    my ($self, $file, $file2) = @_;
+    return 0 unless lc $file eq lc $file2;  # (only looking for differences in case)
+    my ($isSame, $interrupted);
+    my $tmp1 = "${file}_ExifTool_tmp_$$";
+    my $tmp2 = "${file2}_ExifTool_tmp_$$";
+    {
+        local *TMP1;
+        local $SIG{INT} = sub { $interrupted = 1 };
+        if ($self->Open(\*TMP1, $tmp1, '>')) {
+            close TMP1;
+            $isSame = 1 if $self->Exists($tmp2);
+            $self->Unlink($tmp1);
+        }
+    }
+    if ($interrupted and $SIG{INT}) {
+        no strict 'refs';
+        &{$SIG{INT}}();
+    }
+    return $isSame;
+}
+
+#------------------------------------------------------------------------------
 # Create directory for specified file
 # Inputs: 0) ExifTool ref, 1) complete file name including path
 # Returns: 1 = directory created, 0 = nothing done, -1 = error
@@ -3220,6 +3250,8 @@ sub ReverseLookup($$)
     if ($val =~ /^Unknown\s*\((.*)\)$/i) {
         $val = $1;    # was unknown
         if ($val =~ /^0x([\da-fA-F]+)$/) {
+            # disable "Hexadecimal number > 0xffffffff non-portable" warning
+            local $SIG{'__WARN__'} = sub { };
             $val = hex($val);   # convert hex value
         }
     } else {
