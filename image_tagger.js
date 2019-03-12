@@ -4,7 +4,7 @@ const rekognition = new AWS.Rekognition();
 const pgp = require('pg-promise')();
 
 const cn = `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}?ssl=${process.env.PGSSL}`;
-logger.debug(cn);
+console.log(cn);
 
 // Setup the connection
 const db = pgp(cn);
@@ -41,7 +41,7 @@ exports.handler = async (event) => {
       let values = [requestData.key, { "labels": requestData.labels  },0,0 ];
 
       // Execute
-      logger.debug(query, values);
+      console.log(query, values);
       db.oneOrNone(query, values).timeout((process.env.PGTIMEOUT || 10000))
         .then((data) => {
           console.log(data);
