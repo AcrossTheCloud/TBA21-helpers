@@ -43,7 +43,6 @@ provider:
         - "*"
 
 plugins:
-  - serverless-offline
   - serverless-dotenv-plugin
   - serverless-pseudo-parameters
   - serverless-step-functions
