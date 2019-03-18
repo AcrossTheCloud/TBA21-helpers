@@ -4,6 +4,7 @@ const util = require('util');
 const execFile = util.promisify(require('child_process').execFile);
 const download = require('./common').download;
 const crypto = require('crypto');
+const s3 = new AWS.S3();
 
 const stepfunctions = new AWS.StepFunctions();
 
