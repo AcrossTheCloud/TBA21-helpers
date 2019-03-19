@@ -49,11 +49,6 @@ exports.handler = async (event) => {
         let data = await db.one(query, values);
 
 
-        // Execute
-        console.log(query, values);
-        let data = await db.one(query, values);
-
-
         console.log(data);
         callback(null, data);
 
