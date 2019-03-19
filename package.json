@@ -26,6 +26,7 @@
   "devDependencies": {
     "serverless-dotenv-plugin": "^2.0.1",
     "serverless-pseudo-parameters": "^2.4.0",
-    "serverless-step-functions": "^1.13.0"
+    "serverless-step-functions": "^1.13.0",
+    "serverless-step-functions-offline": "^2.1.2"
   }
 }

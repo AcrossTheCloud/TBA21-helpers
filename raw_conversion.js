@@ -3,11 +3,10 @@ process.env.LD_LIBRARY_PATH += ":/var/task/lib"
 
 const util = require('util');
 const spawn = require('child_process').spawn;
-const AWS = require('aws-sdk');
-const s3 = new AWS.S3();
 const fs = require('fs');
 const download = require('./common').download;
 const upload = require('./common').upload;
+const execFile = util.promisify(require('child_process').execFile);
 
 const raw_conversion = async (file) => {
   const outputFile = file.substring(0,file.lastIndexOf('.'))+'.jpg';
@@ -23,23 +22,45 @@ const raw_conversion = async (file) => {
   return outputFile;
 }
 
-module.exports.handler = async(event) => {
+module.exports.handler = async(event,context,callback) => {
 
-  if (event.magic.match(/raw image/)) {
+  console.log('doing raw_conversion');
+  console.log(event);
+
+  try {
 
     let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
     console.log(filename);
-    let outputFile = await raw_conversion(filename);
-    console.log(outputFile);
-    let uploadKey = event.decodedSrcKey.substring(0, event.decodedSrcKey.lastIndexOf('.')) + '.jpg';
 
-    if (outputFile) {
-      let put = await upload(outputFile,uploadKey,event.srcBucket);
-      return put;
-    } else {
+    const { error, stdout, stderr } = await execFile('file', [filename]);
+    if (error) {
+      console.log(error.code);
+      console.log(stderr);
+      console.log(stdout);
       return '';
     }
 
+    if (stdout.toLowerCase().match(/raw image/)) {
+      console.log('raw image detected');
+
+      if (event.s3metadata.ContentLength > 500000000)
+        console.log(`WARNING: the file size for ${event.decodedSrcKey} is over 500mb, this operation might fail.`);
+
+      let outputFile = await raw_conversion(filename);
+      console.log(outputFile);
+      let uploadKey = event.decodedSrcKey.substring(0, event.decodedSrcKey.lastIndexOf('.')) + '.jpg';
+
+      if (outputFile) {
+        let put = await upload(outputFile, uploadKey, event.srcBucket);
+        return put;
+      } else {
+        return '';
+      }
+
+    }
+  } catch (err) {
+    console.log(err);
+    callback(err);
   }
 
 }

@@ -12,45 +12,55 @@ const db = pgp(cn);
 
 exports.handler = async (event) => {
 
-  if (event.magic.match(/jpeg/) || event.magic.match(/png/)) {
+  console.log(event);
+  
+  try {
 
-    let params = {
-      Image: {
-        S3Object: {
-          Bucket: event.srcBucket,
-          Name: event.decodedSrcKey
-        }
-      },
-      MaxLabels: 10,
-      MinConfidence: 60
-    };
+    if (event.s3metadata.ContentType.toLowerCase().match(/(jpeg|jpg|png|)/) || event.decodedSrcKey.toLowerCase().match(/\.hei[cf]$/)) {
 
-    let rekognitionData = await rekognition.detectLabels(params).promise();
+      let params = {
+        Image: {
+          S3Object: {
+            Bucket: event.srcBucket,
+            Name: event.decodedSrcKey
+          }
+        },
+        MaxLabels: 10,
+        MinConfidence: 60
+      };
 
-    if (rekognitionData.Labels.length > 0) {
-      let requestData = { "key": event.decodedSrcKey, "labels": rekognitionData.Labels };
+      let rekognitionData = await rekognition.detectLabels(params).promise();
+
+      if (rekognitionData.Labels.length > 0) {
+
+        // Setup query
+        let query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
+        set updated_at = current_timestamp,
+        metadata = metadata || $2
+        where sha512=$1
+        RETURNING sha512,metadata;`;
+
+        // Setup values
+        let values = [event.sha512Hash, { "labels": rekognitionData.Labels }];
 
 
-      // Setup query
-      let query = `INSERT INTO ${process.env.IMAGE_TAG_TABLE}
-              (decodedsrckey,created_at, updated_at, metadata, the_geom)
-              VALUES ($1, current_timestamp, current_timestamp, $2, ST_SetSRID(ST_Point($3,$4),4326))
-              RETURNING decodedsrckey`;
+        // Execute
+        console.log(query, values);
+        let data = await db.one(query, values);
 
-      // Setup values
-      let values = [requestData.key, { "labels": requestData.labels  },0,0 ];
 
-      // Execute
-      console.log(query, values);
-      db.oneOrNone(query, values).timeout((process.env.PGTIMEOUT || 10000))
-        .then((data) => {
-          console.log(data);
+        // Execute
+        console.log(query, values);
+        let data = await db.one(query, values);
 
-        })
-        .catch((err) => {
-          console.log(err);
-        });
 
+        console.log(data);
+        callback(null, data);
+
+      }
     }
+  } catch (err) {
+    console.log(err);
+    callback(err);
   }
 }
