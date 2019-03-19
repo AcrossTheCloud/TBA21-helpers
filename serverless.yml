@@ -28,7 +28,7 @@ provider:
     PGUSER: ${env:PGUSER}
     PGPASSWORD: ${env:PGPASSWORD}
     PGHOST: ${env:PGHOST}
-    PGPORT: ${env:PGPORT} 
+    PGPORT: ${env:PGPORT, 5432} 
     PGDATABASE: ${env:PGDATABASE}
     PGSSL: ${env:PGSSL}
     PG_IMAGE_METADATA_TABLE: ${env:PG_IMAGE_METADATA_TABLE, "tba21.imagesmetadata"}
