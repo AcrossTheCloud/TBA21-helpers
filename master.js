@@ -24,8 +24,9 @@ module.exports.start = async (event, context, callback) => {
   //   return '';
   // } 
 
-  let data = await s3.headObject({ Bucket: srcBucket, Key: decodedSrcKey });
+  let data = await s3.headObject({ Bucket: srcBucket, Key: decodedSrcKey }).promise();
   console.log(data);
+  return;//testing 
 
   const params = {
     stateMachineArn: process.env.stateMachineArn,
