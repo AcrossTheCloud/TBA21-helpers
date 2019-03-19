@@ -12,7 +12,11 @@ const cn = `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process
 // Setup the connection
 let db = pgp(cn);
 
-
+function DupKeyError(message) {
+  this.name = 'DupKeyError';
+  this.message = message;
+}
+DupKeyError.prototype = new Error();
 
 
 
@@ -87,7 +91,12 @@ module.exports.handler = async (event, context, callback) => {
 
   }
   catch (ex) {
-    callback(ex);
+    let err;
+    if (ex.errorMessage && ex.errorMessage.indexOf("duplicate key value")>=0)
+      err= new DupKeyError(ex.errorMessage);
+    else 
+      err=new Error('Other error')
+    callback(err);
     console.log(ex);
   }
 
