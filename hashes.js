@@ -92,8 +92,8 @@ module.exports.handler = async (event, context, callback) => {
   }
   catch (ex) {
     let err;
-    if (ex.error && ex.error.indexOf("duplicate key value")>=0)
-      err= new DupKeyError(ex.errorMessage);
+    if (ex.detail && ex.detail.indexOf("already exists")>=0)
+      err= new DupKeyError(ex.detail);
     else 
       err=new Error('Other error')
     callback(err);
