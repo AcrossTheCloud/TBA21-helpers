@@ -54,6 +54,7 @@ module.exports.handler = async (event, context, callback) => {
       const signedUrlExpireSeconds = 60 * 30; //30 minutes should be more than enough
       s3ObjectParams.Expires = signedUrlExpireSeconds;
       const imgUrl = s3.getSignedUrl('getObject', s3ObjectParams);
+      console.log(imgUrl);
 
       hashes.imageHash = await imageHash(imgUrl, 16, true);
 
