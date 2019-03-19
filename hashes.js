@@ -78,8 +78,10 @@ module.exports.handler = async (event, context, callback) => {
 
 
     // Execute
-    console.log(query, values);
+    //console.log(query, values);
     let data = await db.one(query, values);
+    console.log(data);
+    console.log(Object.assign(event, {"sha512Hash": data.sha512Hash}));
     callback(null, Object.assign(event, {"sha512Hash": data.sha512Hash}));
 
 
