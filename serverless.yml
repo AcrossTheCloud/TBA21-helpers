@@ -93,6 +93,9 @@ stepFunctions:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
             Next: Parallel
+            Catch:
+            - ErrorEquals: ["DupKeyError"]
+              Next: Parallel
           Parallel:
             Type: Parallel
             Next: Final State
