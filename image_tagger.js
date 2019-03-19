@@ -12,6 +12,9 @@ const db = pgp(cn);
 
 exports.handler = async (event) => {
 
+  console.log('doing image_tagger:');
+  console.log(event);
+
   console.log(event);
   
   try {
