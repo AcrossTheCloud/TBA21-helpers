@@ -12,12 +12,6 @@ const cn = `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process
 // Setup the connection
 let db = pgp(cn);
 
-function DupKeyError(message) {
-  this.name = 'DupKeyError';
-  this.message = message;
-}
-DupKeyError.prototype = new Error();
-
 
 
 module.exports.handler = async (event, context, callback) => {
@@ -90,14 +84,12 @@ module.exports.handler = async (event, context, callback) => {
 
 
   }
-  catch (ex) {
-    let err;
-    if (ex.detail && ex.detail.indexOf("already exists")>=0)
-      err= new DupKeyError(ex.detail);
+  catch (err) {
+    if (err.detail && err.detail.indexOf("already exists")>=0)
+     callback(null,Object.assign(event, {"sha512Hash": sha512Hash}));//succeed to proceed to parallel states
     else 
-      err=new Error('Other error')
-    callback(err);
-    console.log(ex);
+      callback(err);
+    console.log(err);
   }
 
 }
