@@ -2,9 +2,10 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 
 exports.handler = (event, context, callback) => {
-  console.log(event.magic);
+  console.log("doing copy_for_rekognition");
+  console.log(event);
 
-  if (event.magic.match(/jpeg/) || event.magic.match(/png/)) {
+  if (event.s3metadata.ContentType.toLowerCase().match(/(jpeg|png)/)) {
     console.log('copying');
     const params = {
       Bucket: process.env.REKOGNITION_BUCKET,

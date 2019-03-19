@@ -31,6 +31,7 @@ provider:
     PGPORT: ${env:PGPORT} 
     PGDATABASE: ${env:PGDATABASE}
     PGSSL: ${env:PGSSL}
+    PG_IMAGE_METADATA_TABLE: ${env:PG_IMAGE_METADATA_TABLE, "tba21.imagesmetadata"}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -53,6 +54,7 @@ plugins:
   - serverless-dotenv-plugin
   - serverless-pseudo-parameters
   - serverless-step-functions
+  - serverless-step-functions-offline
 
 functions:
   master:
@@ -69,20 +71,14 @@ functions:
       REKOGNITION_BUCKET: oceanarchive-rekognition
   image_tagger:
     handler: image_tagger.handler
-    environment:
-      IMAGE_TAG_TABLE: tba21.imagesmetadata
   copy_video_for_transcoding:
     handler: copy_for_vid_transcoding.handler
     environment:
       TRANSCODE_BUCKET: oceanarchive-video-on-demand-source-1xdwtz84a23si
   hashes:
     handler: hashes.handler
-    environment:
-      HASHES_TABLE: tba21-hashes
   exif:
     handler: exif.handler
-    environment:
-      IMAGE_EXIF_TABLE: tba21-image-exif
   raw_conversion:
     handler: raw_conversion.handler
 
@@ -91,18 +87,16 @@ stepFunctions:
     hellostepfunc:
       name: TBA21FileProcessorStateMachine
       definition:
-        StartAt: Parallel
+        StartAt: Hashes
         States:
+          Hashes: 
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
+            Next: Parallel
           Parallel:
             Type: Parallel
             Next: Final State
             Branches:
-            - StartAt: hashes
-              States:
-                hashes:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
-                  End: true
             - StartAt: exif
               States:
                 exif:
@@ -125,3 +119,8 @@ resources:
       Description: The ARN of the example state machine
       Value:
         Ref: TBA21FileProcessorStateMachine
+custom:
+  stepFunctionsOffline:
+    Hashes: hashes #(v2.0)
+    exif: exif #(v2.0)
+    raw_conversion: raw_conversion
