@@ -58,7 +58,7 @@ module.exports.handler = async (event,context,callback) => {
 
       console.log(data);
       callback(null, data);
-      //return data; //no need for return here ? 
+      return data; //no need for return here ? 
 
 
     }
