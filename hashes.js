@@ -49,14 +49,18 @@ module.exports.handler = async (event, context, callback) => {
 
 
     if (event.srcKey.toLowerCase().match(/(\.png|\.jpg|\.jpeg)$/)) {
+      try {
 
+        const signedUrlExpireSeconds = 60 * 30; //30 minutes should be more than enough
+        s3ObjectParams.Expires = signedUrlExpireSeconds;
+        const imgUrl = s3.getSignedUrl('getObject', s3ObjectParams);
+        console.log(imgUrl);
 
-      const signedUrlExpireSeconds = 60 * 30; //30 minutes should be more than enough
-      s3ObjectParams.Expires = signedUrlExpireSeconds;
-      const imgUrl = s3.getSignedUrl('getObject', s3ObjectParams);
-      console.log(imgUrl);
-
-      hashes.imageHash = await imageHash(imgUrl, 16, true);
+        hashes.imageHash = await imageHash(imgUrl, 16, true);
+      } catch (err) {
+        console.log('Could not compute image-hash, moving on...');
+        console.log(err);
+      }
 
     }
 
