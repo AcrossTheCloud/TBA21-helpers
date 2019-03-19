@@ -19,6 +19,8 @@ module.exports.handler = async (event, context, callback) => {
   console.log('doing hashes...');
   console.log(event);
 
+  let sha512Hash;
+
   try {
 
     let s3ObjectParams = {
@@ -41,7 +43,7 @@ module.exports.handler = async (event, context, callback) => {
     }
 
 
-    let sha512Hash = await checksumFile('sha512', s3ObjectParams);
+    sha512Hash = await checksumFile('sha512', s3ObjectParams);
 
     hashes.md5 = await checksumFile('md5', s3ObjectParams);
 
