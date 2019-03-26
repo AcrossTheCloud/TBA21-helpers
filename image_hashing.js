@@ -1,5 +1,6 @@
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
+const util = require('util');
 const imageHash = util.promisify(require('image-hash'));
 
 const pgp = require('pg-promise')();
