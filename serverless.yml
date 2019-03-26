@@ -107,12 +107,6 @@ stepFunctions:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
                   End: true
-            - StartAt: image_tagger
-              States:
-                image_tagger:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
-                  End: true
             - StartAt: image_hashing
               States:
                 image_hashing:
