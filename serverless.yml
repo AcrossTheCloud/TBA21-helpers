@@ -77,6 +77,7 @@ functions:
       TRANSCODE_BUCKET: oceanarchive-video-on-demand-source-1xdwtz84a23si
   hashes:
     handler: hashes.handler
+    memorySize: 1024
   exif:
     handler: exif.handler
   raw_conversion:
