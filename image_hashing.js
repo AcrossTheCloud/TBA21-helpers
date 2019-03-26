@@ -40,7 +40,7 @@ exports.handler = async (event,context,callback) => {
                 RETURNING sha512,metadata;`;
 
       // Setup values
-      let values = [event.sha512Hash, { "hashes": {"imageHash": imgHash } }];
+      let values = [event.sha512Hash,  {"imageHash": imgHash } ];
 
 
       // Execute
