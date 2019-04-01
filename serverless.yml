@@ -78,13 +78,16 @@ functions:
       REKOGNITION_BUCKET: oceanarchive-rekognition
   image_tagger:
     handler: image_tagger.handler
+  image_hashing:
+    handler: image_hashing.handler
+    memorySize: 1024
   copy_video_for_transcoding:
     handler: copy_for_vid_transcoding.handler
     environment:
       TRANSCODE_BUCKET: oceanarchive-video-on-demand-source-1xdwtz84a23si
   hashes:
     handler: hashes.handler
-    memorySize: 1024
+    memorySize: 512
   exif:
     handler: exif.handler
   raw_conversion:
@@ -111,11 +114,11 @@ stepFunctions:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
                   End: true
-            - StartAt: image_tagger
+            - StartAt: image_hashing
               States:
-                image_tagger:
+                image_hashing:
                   Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
+                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_hashing
                   End: true
             - StartAt: raw_conversion
               States:
