@@ -71,6 +71,8 @@ functions:
       REKOGNITION_BUCKET: oceanarchive-rekognition-test
   image_tagger:
     handler: image_tagger.handler
+    environment:
+      API_KEY_REKOGNITION: ${env:API_KEY_REKOGNITION}
   image_hashing:
     handler: image_hashing.handler
     memorySize: 1024
