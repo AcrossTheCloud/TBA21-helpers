@@ -24,13 +24,6 @@ provider:
   stage: ${env:STAGE, prod}
   timeout: 900
   memorySize: 256
-  vpc:
-    securityGroupIds:
-      - sg-0a5b0d9bd7812edbb
-    subnetdIds:
-      - subnet-b41924fe
-      - subnet-0ba6bf73
-      - subnet-3713eb5e
   environment: #service-wide env vars will be used in some functions
     PGUSER: ${env:PGUSER}
     PGPASSWORD: ${env:PGPASSWORD}
