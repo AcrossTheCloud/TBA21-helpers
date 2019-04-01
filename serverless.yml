@@ -126,6 +126,10 @@ stepFunctions:
                 copy_for_rekognition:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_for_rekognition
+                  Next: image_tagger
+                image_tagger:
+                  Type: Task
+                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
                   End: true
           Final State:
             Type: Pass
