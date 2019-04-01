@@ -68,7 +68,7 @@ functions:
   copy_for_rekognition:
     handler: copy_for_rekognition.handler
     environment:
-      REKOGNITION_BUCKET: oceanarchive-rekognition
+      REKOGNITION_BUCKET: oceanarchive-rekognition-test
   image_tagger:
     handler: image_tagger.handler
   image_hashing:
@@ -118,6 +118,12 @@ stepFunctions:
                 raw_conversion:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion
+                  End: true
+            - StartAt: copy_for_rekognition
+              States:
+                copy_for_rekognition:
+                  Type: Task
+                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_for_rekognition
                   End: true
           Final State:
             Type: Pass
