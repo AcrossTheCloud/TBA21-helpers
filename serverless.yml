@@ -73,6 +73,7 @@ functions:
     handler: image_tagger.handler
     environment:
       API_KEY_REKOGNITION: ${env:API_KEY_REKOGNITION}
+      API_ENDPOINT: ${env:API_ENDPOINT} # of the form https://hostname/prod/labels 
   image_hashing:
     handler: image_hashing.handler
     memorySize: 1024
