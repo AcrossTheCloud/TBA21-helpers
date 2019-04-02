@@ -46,9 +46,11 @@ provider:
         - "arn:aws:s3:::tba21-helpers-test"
     - Effect: Allow
       Action:
-        - rekognition:DetectLabels
+        - "s3:*"
       Resource:
-        - "*"
+        - "arn:aws:s3:::tba21-rekognition-test/*"
+        - "arn:aws:s3:::tba21-rekognition-test"
+
 
 plugins:
   - serverless-dotenv-plugin
