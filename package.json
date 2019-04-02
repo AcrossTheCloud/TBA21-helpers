@@ -21,6 +21,7 @@
     "exiftool-json-db": "^1.0.1",
     "image-hash": "AcrossTheCloud/image-hash",
     "pg-promise": "^8.6.4",
+    "request-promise": "^4.2.4",
     "uuid": "^3.3.2"
   },
   "devDependencies": {

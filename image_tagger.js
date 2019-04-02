@@ -1,6 +1,6 @@
-const AWS = require('aws-sdk');
 
-const rekognition = new AWS.Rekognition();
+const rp = require('request-promise');
+
 const pgp = require('pg-promise')();
 
 const cn = `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}?ssl=${process.env.PGSSL}`;
@@ -17,22 +17,28 @@ exports.handler = async (event,context,callback) => {
   
   try {
 
-    if (event.s3metadata.ContentType.toLowerCase().match(/(jpeg|jpg|png|)/) || event.decodedSrcKey.toLowerCase().match(/\.hei[cf]$/)) {
+    if (event.rekognitionBucket && event.rekognitionKey) {
 
-      let params = {
-        Image: {
-          S3Object: {
-            Bucket: event.srcBucket,
-            Name: event.decodedSrcKey
-          }
+
+      var options = {
+        uri: process.env.API_ENDPOINT,
+        qs: {
+          bucketname: event.rekognitionBucket,
+          decodedsrckey: event.rekognitionKey
         },
-        MaxLabels: 10,
-        MinConfidence: 60
+        headers: {
+          'x-api-key': process.env.API_KEY_REKOGNITION
+        },
+        json: true // Automatically parses the JSON string in the response
       };
 
-      let rekognitionData = await rekognition.detectLabels(params).promise();
+      let labels = await rp(options);
 
-      if (rekognitionData.Labels.length > 0) {
+      console.log('Labels: ');
+      console.log(labels);
+
+
+      if ( Array.isArray(labels) &&( labels.length > 0)) {
 
         // Setup query
         let query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
@@ -42,7 +48,7 @@ exports.handler = async (event,context,callback) => {
         RETURNING sha512,metadata;`;
 
         // Setup values
-        let values = [event.sha512Hash, { "labels": rekognitionData.Labels }];
+        let values = [event.sha512Hash, { "labels": labels }];
 
 
         // Execute
@@ -54,6 +60,8 @@ exports.handler = async (event,context,callback) => {
         callback(null, data);
 
       }
+    }else{
+      console.log('File type not supported for rekognition.');
     }
   } catch (err) {
     console.log(err);
