@@ -38,6 +38,7 @@ module.exports.handler = async (event,context,callback) => {
 
       let exif = await end;
       delete_empty_strings(exif);
+      console.log(exif); //for testing
 
 
       // Setup query

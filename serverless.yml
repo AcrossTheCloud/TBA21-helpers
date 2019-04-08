@@ -101,6 +101,7 @@ stepFunctions:
           Hashes: 
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
+            ResultPath: '$.sha512Hash'
             Next: Parallel
           Parallel:
             Type: Parallel
