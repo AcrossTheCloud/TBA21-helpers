@@ -73,7 +73,7 @@ module.exports.handler = async (event, context, callback) => {
   }
   catch (err) {
     if (err.detail && err.detail.indexOf("already exists")>=0)
-     callback(null,Object.assign(event, {"sha512Hash": sha512Hash}));//succeed to proceed to parallel states
+     callback(null, sha512Hash);//succeed to proceed to parallel states
     else 
       callback(err);
     console.log(err);
