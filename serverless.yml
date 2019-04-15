@@ -103,27 +103,43 @@ stepFunctions:
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
             ResultPath: '$.sha512Hash'
             Next: Parallel
+          ChoiceState:
+            Type: Choice
+            Choices:
+            - Variable: "$.isImage"
+              BooleanEquals: true
+              Next: Exif
+            Default: RawConversion
+          RawConversion:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion
+            End: true
+          Exif:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
+            ResultPath: '$.ExifResult'
+            Next: ChoiceState2
+          ChoiceState2:
+            Type: Choice
+            Choices:
+            - Variable: "$.isHEI"
+              BooleanEquals: true
+              Next: CovertHEI
+            Default: Parallel
+          CovertHEI:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-convertHEI
+            ResultPath: '$.convertHEIresult'
+            Next: Parallel
           Parallel:
             Type: Parallel
             Next: Final State
             Branches:
-            - StartAt: exif
-              States:
-                exif:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
-                  End: true
             - StartAt: image_hashing
               States:
                 image_hashing:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_hashing
-                  End: true
-            - StartAt: raw_conversion
-              States:
-                raw_conversion:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion
                   End: true
             - StartAt: copy_for_rekognition
               States:
