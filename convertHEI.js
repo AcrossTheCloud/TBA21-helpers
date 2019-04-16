@@ -37,8 +37,8 @@ module.exports.handler = async(event,context,callback) => {
 
 
       let uploadKey = event.decodedSrcKey.substring(0, event.decodedSrcKey.lastIndexOf('.')) + '.jpg';
-      let put = await upload(outputFile, uploadKey, 'TOFIX: ANOTHER bucket');
-      callback(null,put);
+      let put = await upload(outputFile, uploadKey, process.env.CONVERSION_BUCKET);
+      callback(null,{convertedBucket: process.env.CONVERSION_BUCKET, convertedKey:uploadKey });
 
 
     
