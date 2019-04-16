@@ -15,9 +15,9 @@ module.exports.start = async (event, context, callback) => {
 
   let data = await s3.headObject({ Bucket: srcBucket, Key: decodedSrcKey }).promise();
   console.log(data);
-  let isHEI=decodedSrcKey.toLowerCase().match(/\.hei[cf]$/);
-  let isImage= (data.ContentType.toLowerCase().match(/image/) || isHEI);
-  let isJPEGPNG = (decodedSrcKey.toLowerCase().match(/(\.png|\.jpg|\.jpeg)$/))
+  let isHEI=Boolean(decodedSrcKey.toLowerCase().match(/\.hei[cf]$/));
+  let isImage= Boolean(data.ContentType.toLowerCase().match(/image/) || isHEI);
+  let isJPEGPNG = Boolean(decodedSrcKey.toLowerCase().match(/(\.png|\.jpg|\.jpeg)$/));
 
   const params = {
     stateMachineArn: process.env.stateMachineArn,
