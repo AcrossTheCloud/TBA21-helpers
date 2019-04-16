@@ -23,8 +23,8 @@ exports.handler = async (event,context,callback) => {
       var options = {
         uri: process.env.API_ENDPOINT,
         qs: {
-          bucketname: event.rekognitionBucket,
-          decodedsrckey: event.rekognitionKey
+          bucketname: event.copy_for_rekognition_results.rekognitionBucket,
+          decodedsrckey: event.copy_for_rekognition_results.rekognitionKey
         },
         headers: {
           'x-api-key': process.env.API_KEY_REKOGNITION
