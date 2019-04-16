@@ -17,7 +17,7 @@ exports.handler = async (event,context,callback) => {
   
   try {
 
-    if (event.rekognitionBucket && event.rekognitionKey) {
+    if (event.copy_for_rekognition_results.rekognitionBucket && event.copy_for_rekognition_results.rekognitionKey) {
 
 
       var options = {

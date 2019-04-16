@@ -50,6 +50,8 @@ provider:
       Resource:
         - "arn:aws:s3:::tba21-rekognition-test/*"
         - "arn:aws:s3:::tba21-rekognition-test"
+        - "arn:aws:s3:::tba21-helpers-heitojpeg-test/*"
+        - "arn:aws:s3:::tba21-helpers-heitojpeg-test"
 
 
 plugins:
@@ -92,6 +94,8 @@ functions:
     handler: raw_conversion.handler
   convertHEI:
     handler: convertHEI.handler
+    environment:
+      CONVERSION_BUCKET: tba21-helpers-heitojpeg-test
 
 stepFunctions:
   stateMachines:
@@ -104,8 +108,8 @@ stepFunctions:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
             ResultPath: '$.sha512Hash'
-            Next: IsImageChoice
-          IsImageChoice:
+            Next: IsImage
+          IsImage:
             Type: Choice
             Choices:
             - Variable: "$.isImage"
@@ -120,8 +124,8 @@ stepFunctions:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
             ResultPath: '$.ExifResult'
-            Next: IsHEIChoice
-          IsHEIChoice:
+            Next: IsJPEG_PNG
+          IsJPEG_PNG:
             Type: Choice
             Choices:
             - Variable: "$.isHEI"
@@ -151,6 +155,7 @@ stepFunctions:
                 copy_for_rekognition:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_for_rekognition
+                  ResultPath: '$.copy_for_rekognition_results'
                   Next: image_tagger
                 image_tagger:
                   Type: Task
@@ -161,6 +166,12 @@ stepFunctions:
             End: true
 
 resources:
+  Resources:
+    S3BucketTempJPEG:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: tba21-helpers-heitojpeg-test
+        # add additional custom bucket configuration here
   Outputs:
     TBA21FileProcessorStateMachine:
       Description: The ARN of the example state machine
