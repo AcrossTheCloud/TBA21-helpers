@@ -22,9 +22,6 @@ exports.handler = async (event,context,callback) => {
       Key: event.decodedSrcKey
     }
 
-    if (event.srcKey.toLowerCase().match(/(\.png|\.jpg|\.jpeg)$/)) {
-
-
       const signedUrlExpireSeconds = 60 * 30; //30 minutes should be more than enough
       s3ObjectParams.Expires = signedUrlExpireSeconds;
       const imgUrl = s3.getSignedUrl('getObject', s3ObjectParams);
@@ -51,7 +48,6 @@ exports.handler = async (event,context,callback) => {
       console.log(data);
       callback(null, data);
 
-    }
 
   } catch (err) {
     console.log(err);

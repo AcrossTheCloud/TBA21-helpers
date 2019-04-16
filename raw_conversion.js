@@ -37,7 +37,7 @@ module.exports.handler = async(event,context,callback) => {
       console.log(error.code);
       console.log(stderr);
       console.log(stdout);
-      return '';
+      throw new Error(error);
     }
 
     if (stdout.toLowerCase().match(/raw image/)) {
