@@ -18,8 +18,8 @@ exports.handler = async (event,context,callback) => {
   
   try {
     let s3ObjectParams = {
-      Bucket: event.srcBucket,
-      Key: event.decodedSrcKey
+      Bucket: (event.isHEI ? event.convertHEIresult.convertedBucket : event.srcBucket),
+      Key: (event.isHEI ? event.convertHEIresult.convertedKey : event.decodedSrcKey)
     }
 
       const signedUrlExpireSeconds = 60 * 30; //30 minutes should be more than enough
