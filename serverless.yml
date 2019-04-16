@@ -90,6 +90,8 @@ functions:
     handler: exif.handler
   raw_conversion:
     handler: raw_conversion.handler
+  convertHEI:
+    handler: convertHEI.handler
 
 stepFunctions:
   stateMachines:
@@ -102,8 +104,8 @@ stepFunctions:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
             ResultPath: '$.sha512Hash'
-            Next: Parallel
-          ChoiceState:
+            Next: IsImageChoice
+          IsImageChoice:
             Type: Choice
             Choices:
             - Variable: "$.isImage"
@@ -118,14 +120,17 @@ stepFunctions:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
             ResultPath: '$.ExifResult'
-            Next: ChoiceState2
-          ChoiceState2:
+            Next: IsHEIChoice
+          IsHEIChoice:
             Type: Choice
             Choices:
             - Variable: "$.isHEI"
               BooleanEquals: true
               Next: CovertHEI
-            Default: Parallel
+            - Variable: "$.isJPEGPNG"
+              BooleanEquals: true
+              Next: Parallel
+            Default: Final State
           CovertHEI:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-convertHEI

@@ -20,8 +20,6 @@ module.exports.handler = async (event,context,callback) => {
   try {
 
 
-    if (event.s3metadata.ContentType.toLowerCase().match(/image/) || event.decodedSrcKey.toLowerCase().match(/\.hei[cf]$/)) {
-
       if (event.s3metadata.ContentLength > 500000000)
         console.log(`WARNING: the file size for ${event.decodedSrcKey} is over 500mb, this operation might fail.`);
 
@@ -62,7 +60,6 @@ module.exports.handler = async (event,context,callback) => {
       return data; //no need for return here ? 
 
 
-    }
   }
   catch (err) {
     console.log(err);
