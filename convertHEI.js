@@ -22,7 +22,7 @@ module.exports.handler = async(event,context,callback) => {
 
     let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
     console.log(filename);
-    let outputFile = filename.substring(0, event.decodedSrcKey.lastIndexOf('.')) + '.jpg';
+    let outputFile = filename.substring(0, filename.lastIndexOf('.')) + '.jpg';
     console.log(outputFile);
 
     const { error, stdout, stderr } = await execFile('/var/task/bin/tifig-static-0.2.2/tifig', ['-v','-p',filename,outputFile]);
