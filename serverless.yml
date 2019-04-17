@@ -119,7 +119,7 @@ stepFunctions:
           RawConversion:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion
-            End: true
+            Next: Final State
           Exif:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
@@ -164,7 +164,6 @@ stepFunctions:
           Final State:
             Type: Pass
             End: true
-
 resources:
   Resources:
     S3BucketTempJPEG:
