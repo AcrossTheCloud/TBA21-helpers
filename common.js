@@ -1,6 +1,9 @@
 const AWS = require('aws-sdk');
 const fs = require('fs');
 const s3 = new AWS.S3();
+const util = require('util');
+const readdir = util.promisify(fs.readdir);
+const unlink = util.promisify(fs.unlink);
 
 module.exports.download = async (srcBucket, srcKey, decodedSrcKey) => {
   let filename = srcKey;
@@ -36,5 +39,18 @@ module.exports.upload = async (filename, key, bucket) => {
   let stream = fs.createReadStream(filename);
   let put = await s3.putObject({Bucket: bucket, Key: key, Body: stream}).promise();
   return put;
+
+}
+
+
+module.exports.cleanTmpDir = async () => {
+  const directory = '/tmp';
+  try {
+    const files = await readdir(directory);
+    const unlinkPromises = files.map(filename => unlink(`${directory}/${filename}`));
+    return Promise.all(unlinkPromises);
+  } catch (err) {
+    console.log(err);
+  }
 
 }
