@@ -73,8 +73,8 @@ module.exports.handler = async (event,context,callback) => {
 
      let exifLongitude,exifLatitude;
      try{
-      exifLongitude=Number(exif.EXIF.GPSLongitude);
-      exifLatitude=Number(exif.EXIF.GPSLatitude);
+      exifLongitude=Number(exif.Composite.GPSLongitude);
+      exifLatitude=Number(exif.Composite.GPSLatitude);
      } catch(err){
        console.log('Error in extracting geolocation from exif...')
        console.log(err);
