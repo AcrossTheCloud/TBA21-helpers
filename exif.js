@@ -1,6 +1,7 @@
 process.env.PATH += ':/var/task/bin'; // add our bin folder to path
 const exifDB = require('exiftool-json-db');
 const download = require('./common').download;
+const cleanTmpDir = require('./common').cleanTmpDir;
 const delete_empty_strings = require('./common').delete_empty_strings;
 const pgp = require('pg-promise')();
 const fs = require('fs');
@@ -23,6 +24,8 @@ module.exports.handler = async (event,context,callback) => {
   console.log(event);
 
   try {
+    await cleanTmpDir();
+    console.log('Cleaned /tmp ...');
 
 
     if (event.s3metadata.ContentLength > 500000000)
