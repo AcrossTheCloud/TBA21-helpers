@@ -3,6 +3,11 @@ const exifDB = require('exiftool-json-db');
 const download = require('./common').download;
 const delete_empty_strings = require('./common').delete_empty_strings;
 const pgp = require('pg-promise')();
+const fs = require('fs');
+
+
+
+
 
 const cn = `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}?ssl=${process.env.PGSSL}`;
 //console.log(cn);
@@ -31,14 +36,29 @@ module.exports.handler = async (event,context,callback) => {
     });
 
     let end = new Promise(function (resolve, reject) {
-      emitter.on('done', () => resolve(require('/tmp/exif.json')));
+      emitter.on('done', (files) => {
+        console.log('Processed files are: ');
+        console.log(files);
+        fs.readFile('/tmp/exif.json', (err, data) => {
+          if (err)
+            reject(err);
+          else
+            resolve(JSON.parse(data))
+        });
+
+      });
       emitter.on('error', reject); // or something like that
     });
 
-    let exif = await end;
-    console.log(exif); //for testing
-    delete_empty_strings(exif);
-    console.log(exif); //for testing
+    let exifDb = await end;
+    delete_empty_strings(exifDb);
+    console.log(exifDb); //for testing
+
+    let exif=exifDb.find((elem) => (elem.SourceFile === (filename.replace('/tmp/','')) ));
+    console.log('Filtered exif record');
+    console.log(exif);
+
+    
 
 
     // Setup query
@@ -53,8 +73,8 @@ module.exports.handler = async (event,context,callback) => {
 
      let exifLongitude,exifLatitude;
      try{
-      exifLongitude=Number(exif[0].EXIF.GPSLongitude);
-      exifLatitude=Number(exif[0].EXIF.GPSLatitude);
+      exifLongitude=Number(exif.EXIF.GPSLongitude);
+      exifLatitude=Number(exif.EXIF.GPSLatitude);
      } catch(err){
        console.log('Error in extracting geolocation from exif...')
        console.log(err);
