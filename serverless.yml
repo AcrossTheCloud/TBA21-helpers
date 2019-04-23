@@ -84,6 +84,8 @@ functions:
     handler: duplicate_handler.handler
   exif:
     handler: exif.handler
+    environment:
+      DEBUG: exiftool-json-db
   raw_conversion:
     handler: raw_conversion.handler
   convertHEI:
