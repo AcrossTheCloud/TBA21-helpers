@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/AcrossTheCloud/TBA21-helpers",
   "dependencies": {
-    "exiftool-json-db": "^1.0.1",
+    "exiftool-json-db": "mehrdadgit/exiftool-json-db",
     "image-hash": "AcrossTheCloud/image-hash",
     "pg-promise": "^8.6.4",
     "request-promise": "^4.2.4",
