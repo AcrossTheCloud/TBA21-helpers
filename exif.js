@@ -54,7 +54,7 @@ module.exports.handler = async (event,context,callback) => {
      let exifLongitude,exifLatitude;
      try{
       exifLongitude=Number(exif[0].EXIF.GPSLongitude);
-      exifLatitude=Number(exif[0].EXIF.GPSLongitude);
+      exifLatitude=Number(exif[0].EXIF.GPSLatitude);
      } catch(err){
        console.log('Error in extracting geolocation from exif...')
        console.log(err);
@@ -64,7 +64,7 @@ module.exports.handler = async (event,context,callback) => {
       query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
               set updated_at = current_timestamp,
               metadata = metadata || $2,
-              the_geom = ST_SetSRID(ST_Point($3,$4),4326),
+              the_geom = ST_SetSRID(ST_Point($3,$4),4326)
               where sha512=$1
               RETURNING sha512,metadata, the_geom;`;
       values.push(exifLongitude,exifLatitude);
