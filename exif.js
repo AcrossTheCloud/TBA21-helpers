@@ -24,6 +24,7 @@ module.exports.handler = async (event,context,callback) => {
       console.log(`WARNING: the file size for ${event.decodedSrcKey} is over 500mb, this operation might fail.`);
 
     let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
+    console.log(filename);
     const emitter = exifDB.create({
       media: '/tmp',
       database: '/tmp/exif.json'
@@ -35,6 +36,7 @@ module.exports.handler = async (event,context,callback) => {
     });
 
     let exif = await end;
+    console.log(exif); //for testing
     delete_empty_strings(exif);
     console.log(exif); //for testing
 
