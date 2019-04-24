@@ -114,12 +114,12 @@ stepFunctions:
           IsImage:
             Type: Choice
             Choices:
-            - Variable: "$.isImage"
-              BooleanEquals: true
-              Next: Exif
             - Variable: "$.hashResult.isDuplicate"
               BooleanEquals: true
               Next: Duplicate_Handler
+            - Variable: "$.isImage"
+              BooleanEquals: true
+              Next: Exif
             Default: RawConversion
           Duplicate_Handler:
             Type: Task
