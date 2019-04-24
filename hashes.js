@@ -66,14 +66,14 @@ module.exports.handler = async (event, context, callback) => {
     //console.log(query, values);
     let data = await db.one(query, values);
     console.log(data);
-    callback(null, data.sha512);
+    callback(null,  {'sha512Hash':data.sha512 , 'isDuplicate':false });
 
 
 
   }
   catch (err) {
     if (err.detail && err.detail.indexOf("already exists")>=0)
-     callback(null, sha512Hash);//succeed to proceed to parallel states
+     callback(null, {'sha512Hash':sha512Hash , 'isDuplicate':true  });//succeed to proceed to parallel states
     else 
       callback(err);
     console.log(err);
