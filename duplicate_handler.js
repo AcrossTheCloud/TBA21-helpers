@@ -31,7 +31,7 @@ module.exports.handler = async (event, context, callback) => {
     let data = await db.one(query, values);
     console.log(data);
 
-    let oldKey = data.decodedSrcKey;
+    let oldKey = data.decodedsrckey;
     let duplicateKeys = data.metadata.duplicateKeys || [];
 
     if (oldKey === event.decodedSrcKey) {
@@ -59,6 +59,7 @@ module.exports.handler = async (event, context, callback) => {
 
         // Do something with signedUrl
       } catch (headErr) {
+        console.log(headErr);
         if (headErr.code === 'NotFound') {
           console.log('Object does not exist, updating the original key...');
           // Setup query
@@ -71,6 +72,8 @@ module.exports.handler = async (event, context, callback) => {
           // Setup values
           values = [event.hashResult.sha512Hash, event.decodedSrcKey];
 
+        } else {
+          callback(headErr);
         }
       }
       data = await db.one(query, values);
