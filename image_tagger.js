@@ -48,7 +48,7 @@ exports.handler = async (event,context,callback) => {
         RETURNING sha512,metadata;`;
 
         // Setup values
-        let values = [event.sha512Hash, { "labels": labels }];
+        let values = [event.hashResult.sha512Hash, { "labels": labels }];
 
 
         // Execute

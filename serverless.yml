@@ -88,6 +88,8 @@ functions:
   hashes:
     handler: hashes.handler
     memorySize: 512
+  duplicate_handler:
+    handler: duplicate_handler.handler
   exif:
     handler: exif.handler
   raw_conversion:
@@ -107,7 +109,7 @@ stepFunctions:
           Hashes: 
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
-            ResultPath: '$.sha512Hash'
+            ResultPath: '$.hashResult'
             Next: IsImage
           IsImage:
             Type: Choice
@@ -115,7 +117,14 @@ stepFunctions:
             - Variable: "$.isImage"
               BooleanEquals: true
               Next: Exif
+            - Variable: "$.hashResult.isDuplicate"
+              BooleanEquals: true
+              Next: Duplicate_Handler
             Default: RawConversion
+          Duplicate_Handler:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-duplicate_handler
+            Next: Final State
           RawConversion:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion

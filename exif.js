@@ -72,7 +72,7 @@ module.exports.handler = async (event,context,callback) => {
         RETURNING sha512,metadata;`;
 
     // Setup values
-    let values = [event.sha512Hash, { "exif": exif }];
+    let values = [event.hashResult.sha512Hash, { "exif": exif }];
 
      let exifLongitude,exifLatitude;
      try{
