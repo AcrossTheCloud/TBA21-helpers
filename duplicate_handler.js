@@ -45,6 +45,7 @@ module.exports.handler = async (event, context, callback) => {
       try {
 
         const headCode = await s3.headObject(params).promise();
+        console.log(headCode);
         console.log('object exists putting duplicate in...');
         query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
         set updated_at = current_timestamp,
@@ -74,6 +75,7 @@ module.exports.handler = async (event, context, callback) => {
 
         } else {
           callback(headErr);
+          return;
         }
       }
       data = await db.one(query, values);
