@@ -163,6 +163,9 @@ stepFunctions:
                   - ErrorEquals: ["States.ALL"]
                     Next: SomethingWentWrong
                   End: true
+                SomethingWentWrong:
+                  Type: Pass
+                  End: true
             - StartAt: copy_for_rekognition
               States:
                 copy_for_rekognition:
@@ -174,9 +177,6 @@ stepFunctions:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
                   End: true
-          SomethingWentWrong:
-            Type: Pass
-            Next: Final State
           Final State:
             Type: Pass
             End: true
