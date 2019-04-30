@@ -152,6 +152,9 @@ stepFunctions:
           Parallel:
             Type: Parallel
             Next: Final State
+            Catch:
+            - ErrorEquals: ["States.ALL"]
+              Next: SomethingWentWrong
             Branches:
             - StartAt: image_hashing
               States:
@@ -159,12 +162,6 @@ stepFunctions:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_hashing
                   ResultPath: '$.imghashing_result'
-                  Catch:
-                  - ErrorEquals: ["States.ALL"]
-                    Next: SomethingWentWrong
-                  End: true
-                SomethingWentWrong:
-                  Type: Pass
                   End: true
             - StartAt: copy_for_rekognition
               States:
@@ -177,9 +174,9 @@ stepFunctions:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
                   End: true
-                  Catch:
-                  - ErrorEquals: ["States.ALL"]
-                    Next: SomethingWentWrong
+          SomethingWentWrong:
+            Type: Pass
+            End: true
           Final State:
             Type: Pass
             End: true
