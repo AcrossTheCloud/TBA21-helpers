@@ -54,7 +54,6 @@ provider:
         - "arn:aws:s3:::tba21-helpers-heitojpeg-test/*"
         - "arn:aws:s3:::tba21-helpers-heitojpeg-test"
 
-
 plugins:
   - serverless-dotenv-plugin
   - serverless-pseudo-parameters
