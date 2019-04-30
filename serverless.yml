@@ -24,6 +24,7 @@ provider:
   stage: ${env:STAGE, prod}
   timeout: 900
   memorySize: 256
+  versionFunctions: false
   environment: #service-wide env vars will be used in some functions
     PGUSER: ${env:PGUSER}
     PGPASSWORD: ${env:PGPASSWORD}
