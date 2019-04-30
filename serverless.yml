@@ -80,7 +80,7 @@ functions:
       API_ENDPOINT: ${env:API_ENDPOINT} # of the form https://hostname/prod/labels 
   image_hashing:
     handler: image_hashing.handler
-    memorySize: 1024
+    memorySize: 3008
   copy_video_for_transcoding:
     handler: copy_for_vid_transcoding.handler
     environment:
