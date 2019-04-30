@@ -177,6 +177,9 @@ stepFunctions:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
                   End: true
+                  Catch:
+                  - ErrorEquals: ["States.ALL"]
+                    Next: SomethingWentWrong
           Final State:
             Type: Pass
             End: true
