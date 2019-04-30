@@ -176,7 +176,7 @@ stepFunctions:
                   End: true
           SomethingWentWrong:
             Type: Pass
-            End: true
+            Next: Final State
           Final State:
             Type: Pass
             End: true
