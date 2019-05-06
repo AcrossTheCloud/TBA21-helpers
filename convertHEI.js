@@ -36,8 +36,9 @@ module.exports.handler = async(event,context,callback) => {
 
 
 
-      let uploadKey = event.decodedSrcKey.substring(0, event.decodedSrcKey.lastIndexOf('.')) + '.jpg';
+      let uploadKey = event.srcKey.substring(0, event.srcKey.lastIndexOf('.')) + '.jpg';
       let put = await upload(outputFile, uploadKey, process.env.CONVERSION_BUCKET);
+      console.log(put);
       callback(null,{convertedBucket: process.env.CONVERSION_BUCKET, convertedKey:uploadKey });
 
 
