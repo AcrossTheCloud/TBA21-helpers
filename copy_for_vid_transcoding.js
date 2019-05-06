@@ -3,7 +3,6 @@ const s3 = new AWS.S3();
 
 module.exports.handler = (event, context, callback) => {
 
-  if (event.decodedSrcKey.match(/\.mp.*/)) {
     const params = {
      Bucket: process.env.TRANSCODE_BUCKET,
      CopySource: `/${event.srcBucket}/${event.decodedSrcKey}`,
@@ -13,6 +12,5 @@ module.exports.handler = (event, context, callback) => {
       if (err) console.log(err, err.stack); // an error occurred
       else     callback(data);           // successful response
     });
-  }
 
 }

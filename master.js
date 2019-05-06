@@ -18,10 +18,11 @@ module.exports.start = async (event, context, callback) => {
   let isHEI=Boolean(decodedSrcKey.toLowerCase().match(/\.hei[cf]$/));
   let isImage= Boolean(data.ContentType.toLowerCase().match(/image/) || isHEI);
   let isJPEGPNG = Boolean(decodedSrcKey.toLowerCase().match(/(\.png|\.jpg|\.jpeg)$/));
+  let isVideo = Boolean(decodedSrcKey.toLowerCase().match(/\.mp.*/));
 
   const params = {
     stateMachineArn: process.env.stateMachineArn,
-    input: JSON.stringify({srcBucket: srcBucket, srcKey: srcKey, decodedSrcKey: decodedSrcKey, s3metadata: data, isHEI,isImage,isJPEGPNG}),
+    input: JSON.stringify({srcBucket: srcBucket, srcKey: srcKey, decodedSrcKey: decodedSrcKey, s3metadata: data, isHEI,isImage,isJPEGPNG, isVideo}),
     name: crypto.createHmac('sha256', srcKey + uuid()).digest('hex')
   }
 
