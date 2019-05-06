@@ -45,6 +45,8 @@ provider:
       Resource:
         - "arn:aws:s3:::tba21-helpers-test/*"
         - "arn:aws:s3:::tba21-helpers-test"
+        - "arn:aws:s3:::acrossthecloud-video-test/*"
+        - "arn:aws:s3:::acrossthecloud-video-test"
     - Effect: Allow
       Action:
         - "s3:*"
