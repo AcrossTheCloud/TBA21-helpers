@@ -7,7 +7,7 @@ module.exports.handler = (event, context, callback) => {
 
     const params = {
      Bucket: process.env.TRANSCODE_BUCKET,
-     CopySource: `/${event.srcBucket}/${event.decodedSrcKey}`,
+     CopySource: `/${event.srcBucket}/${event.srcKey}`,
      Key: event.decodedSrcKey
     };
 
