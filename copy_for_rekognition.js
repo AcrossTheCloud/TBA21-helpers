@@ -7,7 +7,7 @@ exports.handler = (event, context, callback) => {
 
     const params = {
       Bucket: process.env.REKOGNITION_BUCKET,
-      CopySource: (event.isHEI ? `/${event.convertHEIresult.convertedBucket}/${event.convertHEIresult.convertedKey}` : `/${event.srcBucket}/${event.decodedSrcKey}`) ,
+      CopySource: (event.isHEI ? `/${event.convertHEIresult.convertedBucket}/${event.convertHEIresult.convertedKey}` : `/${event.srcBucket}/${event.srcKey}`) ,
       Key: (event.isHEI ? event.convertHEIresult.convertedKey : event.decodedSrcKey)
     };
     s3.copyObject(params, function (err, data) {
