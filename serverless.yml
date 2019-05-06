@@ -110,15 +110,18 @@ stepFunctions:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
             ResultPath: '$.hashResult'
-            Next: IsImage
-          IsImage:
+            Next: FileTypeSwitch
+          FileTypeSwitch:
             Type: Choice
             Choices:
             - Variable: "$.hashResult.isDuplicate"
               BooleanEquals: true
               Next: Duplicate_Handler
-            - Variable: "$.isImage"
-              BooleanEquals: true
+            - Or:
+              - Variable: "$.isImage"
+                BooleanEquals: true
+              - Variable: "$.isVideo"
+                BooleanEquals: true
               Next: Exif
             Default: RawConversion
           Duplicate_Handler:
@@ -133,18 +136,26 @@ stepFunctions:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
             ResultPath: '$.ExifResult'
-            Next: IsJPEG_PNG
-          IsJPEG_PNG:
+            Next: VideoOrImageSwitch
+          VideoOrImageSwitch:
             Type: Choice
             Choices:
             - Variable: "$.isHEI"
               BooleanEquals: true
-              Next: CovertHEI
+              Next: ConvertHEI
+            - Variable: "$.isVideo"
+              BooleanEquals: true
+              Next: Copy_video_for_transcoding
             - Variable: "$.isJPEGPNG"
               BooleanEquals: true
               Next: Parallel
             Default: Final State
-          CovertHEI:
+          Copy_video_for_transcoding:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_video_for_transcoding
+            ResultPath: '$.videoTranscodeResult'
+            Next: Final State
+          ConvertHEI:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-convertHEI
             ResultPath: '$.convertHEIresult'
