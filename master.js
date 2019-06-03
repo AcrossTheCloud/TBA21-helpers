@@ -1,6 +1,5 @@
 const AWS = require('aws-sdk');
 const uuid = require('uuid/v1');
-const util = require('util');
 const crypto = require('crypto');
 const s3 = new AWS.S3();
 

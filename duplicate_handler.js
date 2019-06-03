@@ -21,8 +21,8 @@ module.exports.handler = async (event, context, callback) => {
   try {
 
     // Setup query
-    let query = `select sha512,decodedsrckey, metadata from  ${process.env.PG_IMAGE_METADATA_TABLE}
-                   where sha512=$1;`;
+    let query = `select ID_sha512,all_s3_keys from  ${process.env.PG_IMAGE_METADATA_TABLE}
+                   where ID_sha512=$1;`;
 
     // Setup values
     let values = [event.hashResult.sha512Hash];
@@ -31,8 +31,8 @@ module.exports.handler = async (event, context, callback) => {
     let data = await db.one(query, values);
     console.log(data);
 
-    let oldKey = data.decodedsrckey;
-    let duplicateKeys = data.metadata.duplicateKeys || [];
+    let oldKey = data.all_s3_keys[0];
+    let allkeys = data.all_s3_keys || [];
 
     if (oldKey === event.decodedSrcKey) {
       //same object reuploaded , do nothing
@@ -49,16 +49,14 @@ module.exports.handler = async (event, context, callback) => {
         console.log('object exists putting duplicate in...');
         query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
         set updated_at = current_timestamp,
-        metadata = metadata || $2
-        where sha512=$1
-        RETURNING sha512,decodedsrckey, metadata;`;
-        duplicateKeys.push(event.decodedSrcKey);
+        all_s3_keys = $2
+        where ID_sha512=$1
+        RETURNING ID_sha512,all_s3_keys;`;
+        allkeys.push(event.decodedSrcKey);
 
         // Setup values
-        values = [event.hashResult.sha512Hash, { "duplicateKeys": duplicateKeys }];
+        values = [event.hashResult.sha512Hash, allkeys ];
 
-
-        // Do something with signedUrl
       } catch (headErr) {
         console.log(headErr);
         if (headErr.code === 'NotFound') {
@@ -66,12 +64,12 @@ module.exports.handler = async (event, context, callback) => {
           // Setup query
           query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
                         set updated_at = current_timestamp,
-                        decodedsrckey=$2
-                        where sha512=$1
-                        RETURNING sha512,decodedsrckey;`;
+                        all_s3_keys=$2
+                        where ID_sha512=$1
+                        RETURNING ID_sha512,all_s3_keys;`;
 
           // Setup values
-          values = [event.hashResult.sha512Hash, event.decodedSrcKey];
+          values = [event.hashResult.sha512Hash, [event.decodedSrcKey]];
 
         } else {
           callback(headErr);
