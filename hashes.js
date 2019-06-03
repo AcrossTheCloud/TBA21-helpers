@@ -1,5 +1,4 @@
 const AWS = require('aws-sdk');
-const util = require('util');
 const crypto = require('crypto');
 const s3 = new AWS.S3();
 
@@ -28,7 +27,6 @@ module.exports.handler = async (event, context, callback) => {
     }
 
 
-    let hashes = {};
 
 
     function checksumFile(hashName, s3Params) {
@@ -44,7 +42,7 @@ module.exports.handler = async (event, context, callback) => {
 
     sha512Hash = await checksumFile('sha512', s3ObjectParams);
 
-    hashes.md5 = await checksumFile('md5', s3ObjectParams);
+    let md5 = await checksumFile('md5', s3ObjectParams);
 
 
 
@@ -54,12 +52,12 @@ module.exports.handler = async (event, context, callback) => {
 
     // Setup query
     let query = `INSERT INTO ${process.env.PG_IMAGE_METADATA_TABLE}
-        (sha512,decodedsrckey,created_at, updated_at, metadata)
+        (ID_sha512,all_s3_keys,created_at, updated_at, md5)
         VALUES ($1, $2, current_timestamp, current_timestamp, $3)
         RETURNING sha512;`;
 
     // Setup values
-    let values = [sha512Hash, event.decodedSrcKey, { "hashes": hashes }];
+    let values = [sha512Hash, [event.decodedSrcKey], md5];
 
 
     // Execute
