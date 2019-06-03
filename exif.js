@@ -67,12 +67,12 @@ module.exports.handler = async (event,context,callback) => {
     // Setup query
     let query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
         set updated_at = current_timestamp,
-        metadata = metadata || $2
-        where sha512=$1
-        RETURNING sha512,metadata;`;
+        exif =  $2
+        where ID_sha512=$1
+        RETURNING ID_sha512,exif;`;
 
     // Setup values
-    let values = [event.hashResult.sha512Hash, { "exif": exif }];
+    let values = [event.hashResult.sha512Hash, exif ];
 
      let exifLongitude,exifLatitude;
      try{
@@ -86,10 +86,10 @@ module.exports.handler = async (event,context,callback) => {
     if (exifLatitude && exifLongitude) {
       query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
               set updated_at = current_timestamp,
-              metadata = metadata || $2,
+              exif =  $2,
               the_geom = ST_SetSRID(ST_Point($3,$4),4326)
-              where sha512=$1
-              RETURNING sha512,metadata, the_geom;`;
+              where ID_sha512=$1
+              RETURNING ID_sha512, the_geom;`;
       values.push(exifLongitude,exifLatitude);
     }
 

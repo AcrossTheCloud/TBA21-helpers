@@ -43,12 +43,12 @@ exports.handler = async (event,context,callback) => {
         // Setup query
         let query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
         set updated_at = current_timestamp,
-        metadata = metadata || $2
-        where sha512=$1
-        RETURNING sha512,metadata;`;
+        machine_recognition_tags =  $2
+        where ID_sha512=$1
+        RETURNING ID_sha512,machine_recognition_tags;`;
 
         // Setup values
-        let values = [event.hashResult.sha512Hash, { "labels": labels }];
+        let values = [event.hashResult.sha512Hash,  labels ];
 
 
         // Execute

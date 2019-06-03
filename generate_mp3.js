@@ -1,8 +1,5 @@
 const util = require('util');
 const execFile = util.promisify(require('child_process').execFile);
-const AWS = require('aws-sdk');
-const s3 = new AWS.S3();
-const fs = require('fs');
 const download = require('./common').download;
 const upload = require('./common').upload;
 
