@@ -54,7 +54,7 @@ module.exports.handler = async (event, context, callback) => {
     let query = `INSERT INTO ${process.env.PG_IMAGE_METADATA_TABLE}
         (ID_sha512,all_s3_keys,created_at, updated_at, md5)
         VALUES ($1, $2, current_timestamp, current_timestamp, $3)
-        RETURNING sha512;`;
+        RETURNING ID_sha512;`;
 
     // Setup values
     let values = [sha512Hash, [event.decodedSrcKey], md5];
