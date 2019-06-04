@@ -48,7 +48,7 @@ exports.handler = async (event,context,callback) => {
         RETURNING ID_sha512,machine_recognition_tags;`;
 
         // Setup values
-        let values = [event.hashResult.sha512Hash,  labels ];
+        let values = [event.hashResult.sha512Hash,  {'rekognition_labels': labels} ];
 
 
         // Execute
