@@ -177,6 +177,7 @@ stepFunctions:
           image_tagger:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
+            ResultPath: '$.image_tagger_results'
             Next: image_hashing
           image_hashing:
             Type: Task

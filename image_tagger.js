@@ -57,7 +57,7 @@ exports.handler = async (event,context,callback) => {
 
 
         console.log(data);
-        callback(null, data);
+        callback(null, {'success':true});
 
       }
     }else{
