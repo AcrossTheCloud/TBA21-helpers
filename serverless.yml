@@ -161,34 +161,27 @@ stepFunctions:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-convertHEI
             ResultPath: '$.convertHEIresult'
-            Next: Parallel
-          Parallel:
-            Type: Parallel
-            Next: Final State
-            Catch:
-            - ErrorEquals: ["States.ALL"]
-              Next: SomethingWentWrong
-            Branches:
-            - StartAt: image_hashing
-              States:
-                image_hashing:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_hashing
-                  ResultPath: '$.imghashing_result'
-                  End: true
-            - StartAt: copy_for_rekognition
-              States:
-                copy_for_rekognition:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_for_rekognition
-                  ResultPath: '$.copy_for_rekognition_results'
-                  Next: image_tagger
-                image_tagger:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
-                  End: true
-          SomethingWentWrong:
-            Type: Pass
+            Next: ImageSizeSwitch
+          ImageSizeSwitch:
+            Type: Choice
+            Choices:
+            - Variable: "$.s3metadata.ContentLength"
+              NumericLessThanEquals: 15728640 #15*1024*1024
+              Next: copy_for_rekognition
+            Default: image_hashing
+          copy_for_rekognition:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_for_rekognition
+            ResultPath: '$.copy_for_rekognition_results'
+            Next: image_tagger
+          image_tagger:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
+            Next: image_hashing
+          image_hashing:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_hashing
+            ResultPath: '$.imghashing_result'
             Next: Final State
           Final State:
             Type: Pass
