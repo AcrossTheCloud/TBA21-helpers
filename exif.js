@@ -87,9 +87,9 @@ module.exports.handler = async (event,context,callback) => {
       query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
               set updated_at = current_timestamp,
               exif =  $2,
-              the_geom = ST_SetSRID(ST_Point($3,$4),4326)
+              location = ST_SetSRID(ST_Point($3,$4),4326)
               where ID_sha512=$1
-              RETURNING ID_sha512, the_geom;`;
+              RETURNING ID_sha512, location;`;
       values.push(exifLongitude,exifLatitude);
     }
 
