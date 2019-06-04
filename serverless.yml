@@ -150,7 +150,7 @@ stepFunctions:
               Next: Copy_video_for_transcoding
             - Variable: "$.isJPEGPNG"
               BooleanEquals: true
-              Next: Parallel
+              Next: ImageSizeSwitch
             Default: Final State
           Copy_video_for_transcoding:
             Type: Task
