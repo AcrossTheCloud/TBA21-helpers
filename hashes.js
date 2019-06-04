@@ -64,7 +64,7 @@ module.exports.handler = async (event, context, callback) => {
     //console.log(query, values);
     let data = await db.one(query, values);
     console.log(data);
-    callback(null,  {'sha512Hash':data.sha512 , 'isDuplicate':false });
+    callback(null,  {'sha512Hash':data.id_sha512 , 'isDuplicate':false });
 
 
 
