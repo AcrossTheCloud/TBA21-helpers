@@ -1,37 +1,113 @@
 process.env.PATH += ':/var/task/bin'; // add our bin folder to path
 const exifDB = require('exiftool-json-db');
 const download = require('./common').download;
+const cleanTmpDir = require('./common').cleanTmpDir;
 const delete_empty_strings = require('./common').delete_empty_strings;
+const pgp = require('pg-promise')();
+const fs = require('fs');
 
-const AWS = require('aws-sdk');
-const docClient = new AWS.DynamoDB.DocumentClient();
 
-module.exports.handler = async (event) => {
 
-  if (event.magic.match(/image/) || event.decodedSrcKey.toLowerCase().match(/\.hei[cf]$/)) {
-    
+
+
+const cn = `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}?ssl=${process.env.PGSSL}`;
+//console.log(cn);
+
+// Setup the connection
+let db = pgp(cn);
+
+
+
+module.exports.handler = async (event,context,callback) => {
+
+  console.log('doing exif...');
+  console.log(event);
+
+  try {
+    await cleanTmpDir();
+    console.log('Cleaned /tmp ...');
+
+
+    if (event.s3metadata.ContentLength > 500000000)
+      console.log(`WARNING: the file size for ${event.decodedSrcKey} is over 500mb, this operation might fail.`);
+
     let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
+    console.log(filename);
     const emitter = exifDB.create({
       media: '/tmp',
       database: '/tmp/exif.json'
     });
 
     let end = new Promise(function (resolve, reject) {
-      emitter.on('done', () => resolve(require('/tmp/exif.json')));
+      emitter.on('done', (files) => {
+        console.log('Processed files are: ');
+        console.log(files);
+        fs.readFile('/tmp/exif.json', (err, data) => {
+          if (err)
+            reject(err);
+          else
+            resolve(JSON.parse(data))
+        });
+
+      });
       emitter.on('error', reject); // or something like that
     });
 
-    let exif = await end;
-    delete_empty_strings(exif);
+    let exifDb = await end;
+    delete_empty_strings(exifDb);
+    console.log(exifDb); //for testing
 
-    let putParams = {
-      TableName: process.env.IMAGE_EXIF_TABLE,
-      Item: {"key": event.decodedSrcKey, "exif": exif}
-    };
+    let exif=exifDb.find((elem) => (elem.SourceFile === (filename.replace('/tmp/','')) ));
+    console.log('Filtered exif record');
+    console.log(exif);
 
-    let dynamoDBdata = await docClient.put(putParams).promise();
-    console.log(dynamoDBdata);
-    return dynamoDBdata;
+    
 
+
+    // Setup query
+    let query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
+        set updated_at = current_timestamp,
+        exif =  $2
+        where ID_sha512=$1
+        RETURNING ID_sha512,exif;`;
+
+    // Setup values
+    let values = [event.hashResult.sha512Hash, exif ];
+
+     let exifLongitude,exifLatitude;
+     try{
+      exifLongitude=Number(exif.Composite.GPSLongitude);
+      exifLatitude=Number(exif.Composite.GPSLatitude);
+     } catch(err){
+       console.log('Error in extracting geolocation from exif...')
+       console.log(err);
+
+     }
+    if (exifLatitude && exifLongitude) {
+      query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
+              set updated_at = current_timestamp,
+              exif =  $2,
+              location = ST_SetSRID(ST_Point($3,$4),4326)
+              where ID_sha512=$1
+              RETURNING ID_sha512, location;`;
+      values.push(exifLongitude,exifLatitude);
+    }
+
+
+
+    // Execute
+    console.log(query, values);
+    let data = await db.one(query, values);
+
+
+    console.log(data);
+    callback(null, { success: true });
+    //return data; //no need for return here ? 
+
+
+  }
+  catch (err) {
+    console.log(err);
+    callback(err);
   }
 }

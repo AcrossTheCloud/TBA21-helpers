@@ -18,12 +18,16 @@
   },
   "homepage": "https://github.com/AcrossTheCloud/TBA21-helpers",
   "dependencies": {
-    "exiftool-json-db": "^1.0.1",
-    "image-hash": "^2.0.0",
+    "exiftool-json-db": "mehrdadgit/exiftool-json-db",
+    "image-hash": "AcrossTheCloud/image-hash",
+    "pg-promise": "^8.7.2",
+    "request-promise": "^4.2.4",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "serverless-dotenv-plugin": "^2.1.1",
     "serverless-pseudo-parameters": "^2.4.0",
-    "serverless-step-functions": "^1.13.0"
+    "serverless-step-functions": "^1.24.0",
+    "serverless-step-functions-offline": "^2.1.2"
   }
 }

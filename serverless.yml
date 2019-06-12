@@ -20,10 +20,19 @@ service: TBA21-helpers # NOTE: update this with your service name
 provider:
   name: aws
   runtime: nodejs8.10
-  region: eu-central-1
-  stage: prod
+  region: ${env:REGION, eu-central-1}
+  stage: ${env:STAGE, prod}
   timeout: 900
   memorySize: 256
+  versionFunctions: false
+  environment: #service-wide env vars will be used in some functions
+    PGUSER: ${env:PGUSER}
+    PGPASSWORD: ${env:PGPASSWORD}
+    PGHOST: ${env:PGHOST}
+    PGPORT: ${env:PGPORT, "5432"} 
+    PGDATABASE: ${env:PGDATABASE}
+    PGSSL: ${env:PGSSL}
+    PG_IMAGE_METADATA_TABLE: ${env:PG_IMAGE_METADATA_TABLE, "tba21.s3uploads"}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -34,33 +43,20 @@ provider:
       Action:
         - "s3:*"
       Resource:
-        - "arn:aws:s3:::oceanarchive/*"
-        - "arn:aws:s3:::oceanarchive"
-        - "arn:aws:s3:::oceanarchive-rekognition/*"
-        - "arn:aws:s3:::oceanarchive-rekognition"
-        - "arn:aws:s3:::tba21-academy/*"
-        - "arn:aws:s3:::tba21-academy"
-        - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si"
+        - "arn:aws:s3:::oceanarchive-demo-dev/*"
+        - "arn:aws:s3:::oceanarchive-demo-dev"
         - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si/*"
-    - Effect: Allow
-      Action:
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:GetItem
-        - dynamodb:PutItem
-        - dynamodb:UpdateItem
-        - dynamodb:DeleteItem
-      Resource:
-        - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/tba21*"
-    - Effect: Allow
-      Action:
-        - rekognition:DetectLabels
-      Resource:
-        - "*"
+        - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si"
+        - "arn:aws:s3:::tba21-helpers-heitojpeg/*"
+        - "arn:aws:s3:::tba21-helpers-heitojpeg"
+        - "arn:aws:s3:::tba21-rekognition/*"
+        - "arn:aws:s3:::tba21-rekognition"
 
 plugins:
+  - serverless-dotenv-plugin
   - serverless-pseudo-parameters
   - serverless-step-functions
+  - serverless-step-functions-offline
 
 functions:
   master:
@@ -74,74 +70,133 @@ functions:
   copy_for_rekognition:
     handler: copy_for_rekognition.handler
     environment:
-      REKOGNITION_BUCKET: oceanarchive-rekognition
+      REKOGNITION_BUCKET: tba21-rekognition-test
   image_tagger:
     handler: image_tagger.handler
     environment:
-      IMAGE_TAG_TABLE: tba21-image-tags
+      API_KEY_REKOGNITION: ${env:API_KEY_REKOGNITION}
+      API_ENDPOINT: ${env:API_ENDPOINT} # of the form https://hostname/prod/labels 
+  image_hashing:
+    handler: image_hashing.handler
+    memorySize: 3008
   copy_video_for_transcoding:
     handler: copy_for_vid_transcoding.handler
     environment:
       TRANSCODE_BUCKET: oceanarchive-video-on-demand-source-1xdwtz84a23si
   hashes:
     handler: hashes.handler
-    environment:
-      HASHES_TABLE: tba21-hashes
+    memorySize: 512
+  duplicate_handler:
+    handler: duplicate_handler.handler
   exif:
     handler: exif.handler
-    environment:
-      IMAGE_EXIF_TABLE: tba21-image-exif
   raw_conversion:
     handler: raw_conversion.handler
+  convertHEI:
+    handler: convertHEI.handler
+    environment:
+      CONVERSION_BUCKET: tba21-helpers-heitojpeg
 
 stepFunctions:
   stateMachines:
     hellostepfunc:
       name: TBA21FileProcessorStateMachine
       definition:
-        StartAt: Parallel
+        StartAt: Hashes
         States:
-          Parallel:
-            Type: Parallel
+          Hashes: 
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
+            ResultPath: '$.hashResult'
+            Next: FileTypeSwitch
+          FileTypeSwitch:
+            Type: Choice
+            Choices:
+            - Variable: "$.hashResult.isDuplicate"
+              BooleanEquals: true
+              Next: Duplicate_Handler
+            - Or:
+              - Variable: "$.isImage"
+                BooleanEquals: true
+              - Variable: "$.isVideo"
+                BooleanEquals: true
+              Next: Exif
+            Default: RawConversion
+          Duplicate_Handler:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-duplicate_handler
             Next: Final State
-            Branches:
-            - StartAt: generateMP3
-              States:
-                generateMP3:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-generateMP3
-                  End: true
-            - StartAt: copy_for_rekognition
-              States:
-                copy_for_rekognition:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_for_rekognition
-                  End: true
-            - StartAt: hashes
-              States:
-                hashes:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
-                  End: true
-            - StartAt: exif
-              States:
-                exif:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
-                  End: true
-            - StartAt: raw_conversion
-              States:
-                raw_conversion:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion
-                  End: true
+          RawConversion:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion
+            Next: Final State
+          Exif:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
+            ResultPath: '$.ExifResult'
+            Next: VideoOrImageSwitch
+          VideoOrImageSwitch:
+            Type: Choice
+            Choices:
+            - Variable: "$.isHEI"
+              BooleanEquals: true
+              Next: ConvertHEI
+            - Variable: "$.isVideo"
+              BooleanEquals: true
+              Next: Copy_video_for_transcoding
+            - Variable: "$.isJPEGPNG"
+              BooleanEquals: true
+              Next: ImageSizeSwitch
+            Default: Final State
+          Copy_video_for_transcoding:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_video_for_transcoding
+            ResultPath: '$.videoTranscodeResult'
+            Next: Final State
+          ConvertHEI:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-convertHEI
+            ResultPath: '$.convertHEIresult'
+            Next: ImageSizeSwitch
+          ImageSizeSwitch:
+            Type: Choice
+            Choices:
+            - Variable: "$.s3metadata.ContentLength"
+              NumericLessThanEquals: 15728640 #15*1024*1024
+              Next: copy_for_rekognition
+            Default: image_hashing
+          copy_for_rekognition:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_for_rekognition
+            ResultPath: '$.copy_for_rekognition_results'
+            Next: image_tagger
+          image_tagger:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
+            ResultPath: '$.image_tagger_results'
+            Next: image_hashing
+          image_hashing:
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_hashing
+            ResultPath: '$.imghashing_result'
+            Next: Final State
           Final State:
             Type: Pass
             End: true
-
 resources:
+  Resources:
+    S3BucketTempJPEG:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: tba21-helpers-heitojpeg
+        # add additional custom bucket configuration here
   Outputs:
     TBA21FileProcessorStateMachine:
       Description: The ARN of the example state machine
       Value:
         Ref: TBA21FileProcessorStateMachine
+custom:
+  stepFunctionsOffline:
+    Hashes: hashes #(v2.0)
+    exif: exif #(v2.0)
+    raw_conversion: raw_conversion

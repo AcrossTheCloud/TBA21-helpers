@@ -1,9 +1,7 @@
 const AWS = require('aws-sdk');
 const uuid = require('uuid/v1');
-const util = require('util');
-const execFile = util.promisify(require('child_process').execFile);
-const download = require('./common').download;
 const crypto = require('crypto');
+const s3 = new AWS.S3();
 
 const stepfunctions = new AWS.StepFunctions();
 
@@ -13,19 +11,17 @@ module.exports.start = async (event, context, callback) => {
   const srcKey = s3Record.object.key; 
   const decodedSrcKey = decodeURIComponent(s3Record.object.key.replace(/\+/g, " "));
 
-  let filename = await download(srcBucket, srcKey, decodedSrcKey);
 
-  const { error, stdout, stderr } = await execFile('file', [filename]);
-  if (error) {
-    console.log(error.code);
-    console.log(stderr);
-    console.log(stdout);
-    return '';
-  } 
+  let data = await s3.headObject({ Bucket: srcBucket, Key: decodedSrcKey }).promise();
+  console.log(data);
+  let isHEI=Boolean(decodedSrcKey.toLowerCase().match(/\.hei[cf]$/));
+  let isImage= Boolean(data.ContentType.toLowerCase().match(/image/) || isHEI);
+  let isJPEGPNG = Boolean(decodedSrcKey.toLowerCase().match(/(\.png|\.jpg|\.jpeg)$/));
+  let isVideo = Boolean(decodedSrcKey.toLowerCase().match(/\.mp.*/));
 
   const params = {
     stateMachineArn: process.env.stateMachineArn,
-    input: JSON.stringify({srcBucket: srcBucket, srcKey: srcKey, decodedSrcKey: decodedSrcKey, magic: stdout.toLowerCase()}),
+    input: JSON.stringify({srcBucket: srcBucket, srcKey: srcKey, decodedSrcKey: decodedSrcKey, s3metadata: data, isHEI,isImage,isJPEGPNG, isVideo}),
     name: crypto.createHmac('sha256', srcKey + uuid()).digest('hex')
   }
 
