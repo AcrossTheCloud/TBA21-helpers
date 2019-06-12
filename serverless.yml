@@ -47,8 +47,8 @@ provider:
         - "arn:aws:s3:::oceanarchive-demo-dev"
         - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si/*"
         - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si"
-        - "arn:aws:s3:::tba21-helpers-heitojpeg/*"
-        - "arn:aws:s3:::tba21-helpers-heitojpeg"
+        - "arn:aws:s3:::tba21-helpers-heictojpeg/*"
+        - "arn:aws:s3:::tba21-helpers-heictojpeg"
         - "arn:aws:s3:::tba21-rekognition/*"
         - "arn:aws:s3:::tba21-rekognition"
 
@@ -70,7 +70,7 @@ functions:
   copy_for_rekognition:
     handler: copy_for_rekognition.handler
     environment:
-      REKOGNITION_BUCKET: tba21-rekognition-test
+      REKOGNITION_BUCKET: tba21-rekognition
   image_tagger:
     handler: image_tagger.handler
     environment:
@@ -95,7 +95,7 @@ functions:
   convertHEI:
     handler: convertHEI.handler
     environment:
-      CONVERSION_BUCKET: tba21-helpers-heitojpeg
+      CONVERSION_BUCKET: tba21-helpers-heictojpeg
 
 stepFunctions:
   stateMachines:
