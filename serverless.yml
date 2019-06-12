@@ -43,18 +43,14 @@ provider:
       Action:
         - "s3:*"
       Resource:
-        - "arn:aws:s3:::tba21-helpers-test/*"
-        - "arn:aws:s3:::tba21-helpers-test"
-        - "arn:aws:s3:::acrossthecloud-video-test/*"
-        - "arn:aws:s3:::acrossthecloud-video-test"
-    - Effect: Allow
-      Action:
-        - "s3:*"
-      Resource:
-        - "arn:aws:s3:::tba21-rekognition-test/*"
-        - "arn:aws:s3:::tba21-rekognition-test"
-        - "arn:aws:s3:::tba21-helpers-heitojpeg-test/*"
-        - "arn:aws:s3:::tba21-helpers-heitojpeg-test"
+        - "arn:aws:s3:::oceanarchive-demo-dev/*"
+        - "arn:aws:s3:::oceanarchive-demo-dev"
+        - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si/*"
+        - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si"
+        - "arn:aws:s3:::tba21-helpers-heitojpeg/*"
+        - "arn:aws:s3:::tba21-helpers-heitojpeg"
+        - "arn:aws:s3:::tba21-rekognition/*"
+        - "arn:aws:s3:::tba21-rekognition"
 
 plugins:
   - serverless-dotenv-plugin
@@ -86,7 +82,7 @@ functions:
   copy_video_for_transcoding:
     handler: copy_for_vid_transcoding.handler
     environment:
-      TRANSCODE_BUCKET: acrossthecloud-video-test
+      TRANSCODE_BUCKET: oceanarchive-video-on-demand-source-1xdwtz84a23si
   hashes:
     handler: hashes.handler
     memorySize: 512
@@ -99,7 +95,7 @@ functions:
   convertHEI:
     handler: convertHEI.handler
     environment:
-      CONVERSION_BUCKET: tba21-helpers-heitojpeg-test
+      CONVERSION_BUCKET: tba21-helpers-heitojpeg
 
 stepFunctions:
   stateMachines:
@@ -192,7 +188,7 @@ resources:
     S3BucketTempJPEG:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: tba21-helpers-heitojpeg-test
+        BucketName: tba21-helpers-heitojpeg
         # add additional custom bucket configuration here
   Outputs:
     TBA21FileProcessorStateMachine:
