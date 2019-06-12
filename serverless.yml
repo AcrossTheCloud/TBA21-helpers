@@ -188,7 +188,7 @@ resources:
     S3BucketTempJPEG:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: tba21-helpers-heitojpeg
+        BucketName: tba21-helpers-heictojpeg
         # add additional custom bucket configuration here
   Outputs:
     TBA21FileProcessorStateMachine:
