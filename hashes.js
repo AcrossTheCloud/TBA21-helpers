@@ -51,27 +51,27 @@ module.exports.handler = async (event, context, callback) => {
 
 
     // Setup query
-    let query = `INSERT INTO ${process.env.PG_IMAGE_METADATA_TABLE}
-        (ID_sha512,all_s3_keys,created_at, updated_at, md5)
+    let query = `INSERT INTO ${process.env.PG_ITEMS_TABLE}
+        (s3_key,sha512,created_at, updated_at, md5)
         VALUES ($1, $2, current_timestamp, current_timestamp, $3)
-        RETURNING ID_sha512;`;
+        RETURNING s3_key;`;
 
     // Setup values
-    let values = [sha512Hash, [event.decodedSrcKey], md5];
+    let values = [event.decodedSrcKey,sha512Hash, md5];
 
 
     // Execute
     //console.log(query, values);
     let data = await db.one(query, values);
     console.log(data);
-    callback(null,  {'sha512Hash':data.id_sha512 , 'isDuplicate':false });
+    callback(null,  {'db_s3_key':data.s3_key , 'isDuplicate':false });
 
 
 
   }
   catch (err) {
     if (err.detail && err.detail.indexOf("already exists")>=0)
-     callback(null, {'sha512Hash':sha512Hash , 'isDuplicate':true  });//succeed to proceed to parallel states
+     callback(null, {'db_s3_key':event.decodedSrcKey , 'isDuplicate':true  });//succeed to proceed to parallel states
     else 
       callback(err);
     console.log(err);
