@@ -41,14 +41,14 @@ exports.handler = async (event,context,callback) => {
       if ( Array.isArray(labels) &&( labels.length > 0)) {
 
         // Setup query
-        let query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
+        let query = `UPDATE ${process.env.PG_ITEMS_TABLE}
         set updated_at = current_timestamp,
         machine_recognition_tags =  $2
-        where ID_sha512=$1
-        RETURNING ID_sha512,machine_recognition_tags;`;
+        where s3_key=$1
+        RETURNING s3_key, machine_recognition_tags;`;
 
         // Setup values
-        let values = [event.hashResult.sha512Hash,  {'rekognition_labels': labels} ];
+        let values = [event.hashResult.db_s3_key,  {'rekognition_labels': labels} ];
 
 
         // Execute
