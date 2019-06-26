@@ -32,7 +32,7 @@ provider:
     PGPORT: ${env:PGPORT, "5432"} 
     PGDATABASE: ${env:PGDATABASE}
     PGSSL: ${env:PGSSL}
-    PG_IMAGE_METADATA_TABLE: ${env:PG_IMAGE_METADATA_TABLE, "tba21.s3uploads"}
+    PG_ITEMS_TABLE: ${env:PG_IMAGE_METADATA_TABLE, "tba21.items"}
   iamRoleStatements:
     - Effect: "Allow"
       Action:
@@ -114,7 +114,7 @@ stepFunctions:
             Choices:
             - Variable: "$.hashResult.isDuplicate"
               BooleanEquals: true
-              Next: Duplicate_Handler
+              Next: Final State
             - Or:
               - Variable: "$.isImage"
                 BooleanEquals: true
@@ -122,10 +122,6 @@ stepFunctions:
                 BooleanEquals: true
               Next: Exif
             Default: RawConversion
-          Duplicate_Handler:
-            Type: Task
-            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-duplicate_handler
-            Next: Final State
           RawConversion:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion

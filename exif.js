@@ -65,14 +65,14 @@ module.exports.handler = async (event,context,callback) => {
 
 
     // Setup query
-    let query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
+    let query = `UPDATE ${process.env.PG_ITEMS_TABLE}
         set updated_at = current_timestamp,
         exif =  $2
-        where ID_sha512=$1
-        RETURNING ID_sha512,exif;`;
+        where s3_key=$1
+        RETURNING s3_key,exif;`;
 
     // Setup values
-    let values = [event.hashResult.sha512Hash, exif ];
+    let values = [event.hashResult.db_s3_key, exif ];
 
      let exifLongitude,exifLatitude;
      try{
@@ -84,12 +84,12 @@ module.exports.handler = async (event,context,callback) => {
 
      }
     if (exifLatitude && exifLongitude) {
-      query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
+      query = `UPDATE ${process.env.PG_ITEMS_TABLE}
               set updated_at = current_timestamp,
               exif =  $2,
               location = ST_SetSRID(ST_Point($3,$4),4326)
-              where ID_sha512=$1
-              RETURNING ID_sha512, location;`;
+              where s3_key=$1
+              RETURNING s3_key, location;`;
       values.push(exifLongitude,exifLatitude);
     }
 

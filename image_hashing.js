@@ -30,14 +30,14 @@ exports.handler = async (event,context,callback) => {
       let imgHash = await imageHash(imgUrl, 16, true);
 
       // Setup query
-      let query = `UPDATE ${process.env.PG_IMAGE_METADATA_TABLE}
+      let query = `UPDATE ${process.env.PG_ITEMS_TABLE}
                 set updated_at = current_timestamp,
                 image_hash = $2
-                where ID_sha512=$1
-                RETURNING ID_sha512,image_hash;`;
+                where s3_key=$1
+                RETURNING s3_key,image_hash;`;
 
       // Setup values
-      let values = [event.hashResult.sha512Hash,   imgHash ];
+      let values = [event.hashResult.db_s3_key,   imgHash ];
 
 
       // Execute
