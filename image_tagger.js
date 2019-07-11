@@ -1,5 +1,7 @@
 
-const rp = require('request-promise');
+const AWS = require('aws-sdk');
+
+const rekognition = new AWS.Rekognition();
 
 const pgp = require('pg-promise')();
 
@@ -17,22 +19,19 @@ exports.handler = async (event,context,callback) => {
   
   try {
 
-    if (event.copy_for_rekognition_results.rekognitionBucket && event.copy_for_rekognition_results.rekognitionKey) {
-
-
-      var options = {
-        uri: process.env.API_ENDPOINT,
-        qs: {
-          bucketname: event.copy_for_rekognition_results.rekognitionBucket,
-          decodedsrckey: event.copy_for_rekognition_results.rekognitionKey
+      let params = {
+        Image: {
+          S3Object: {
+            Bucket: event.srcBucket,
+            Name: event.decodedSrcKey
+          }
         },
-        headers: {
-          'x-api-key': process.env.API_KEY_REKOGNITION
-        },
-        json: true // Automatically parses the JSON string in the response
+        MaxLabels: 10,
+        MinConfidence: 60
       };
 
-      let labels = await rp(options);
+      const rekognitionData = await rekognition.detectLabels(params).promise();
+      const labels = rekognitionData.Labels;
 
       console.log('Labels: ');
       console.log(labels);

@@ -67,15 +67,8 @@ functions:
     handler: generate_mp3.handler
     environment:
       ALEXA_AUDIO_BUCKET: oceanarchive-alexa-audio
-  copy_for_rekognition:
-    handler: copy_for_rekognition.handler
-    environment:
-      REKOGNITION_BUCKET: tba21-rekognition
   image_tagger:
     handler: image_tagger.handler
-    environment:
-      API_KEY_REKOGNITION: ${env:API_KEY_REKOGNITION}
-      API_ENDPOINT: ${env:API_ENDPOINT} # of the form https://hostname/prod/labels 
   image_hashing:
     handler: image_hashing.handler
     memorySize: 3008
@@ -159,13 +152,8 @@ stepFunctions:
             Choices:
             - Variable: "$.s3metadata.ContentLength"
               NumericLessThanEquals: 15728640 #15*1024*1024
-              Next: copy_for_rekognition
+              Next: image_tagger
             Default: image_hashing
-          copy_for_rekognition:
-            Type: Task
-            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_for_rekognition
-            ResultPath: '$.copy_for_rekognition_results'
-            Next: image_tagger
           image_tagger:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
