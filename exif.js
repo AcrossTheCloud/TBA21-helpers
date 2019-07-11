@@ -29,7 +29,7 @@ const cn = `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process
 //console.log(cn);
 
 // Setup the connection
-let db = pgp(cn);
+const db = pgp(cn);
 
 
 
