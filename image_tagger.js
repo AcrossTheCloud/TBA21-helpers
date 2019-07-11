@@ -59,9 +59,6 @@ exports.handler = async (event,context,callback) => {
         callback(null, {'success':true});
 
       }
-    }else{
-      console.log('File type not supported for rekognition.');
-    }
   } catch (err) {
     console.log(err);
     callback(err);
