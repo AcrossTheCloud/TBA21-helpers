@@ -21,9 +21,9 @@ exports.handler = async (event,context,callback) => {
 
       let params = {
         Image: {
-          S3Object: {
-            Bucket: event.srcBucket,
-            Name: event.decodedSrcKey
+          S3Object: { 
+            Bucket: (event.isHEI ? event.convertHEIresult.convertedBucket : event.srcBucket),
+            Name: (event.isHEI ? event.convertHEIresult.convertedKey : event.decodedSrcKey)
           }
         },
         MaxLabels: 10,
