@@ -9,7 +9,7 @@ const fs = require('fs');
 
 const path = require('path');
 //joining path of directory 
-const directoryPath = path.join(__dirname, 'bin');
+const directoryPath = path.join(process.env.LAMBDA_TASK_ROOT, 'bin');
 //passsing directoryPath and callback function
 fs.readdir(directoryPath, function (err, files) {
     //handling error
