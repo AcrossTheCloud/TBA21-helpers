@@ -1,4 +1,4 @@
-process.env.PATH += ':'+process.env.LAMBDA_TASK_ROOT+'/bin'; // add our bin folder to path
+
 const exifDB = require('exiftool-json-db');
 const download = require('./common').download;
 const cleanTmpDir = require('./common').cleanTmpDir;
@@ -38,6 +38,7 @@ module.exports.handler = async (event,context,callback) => {
 
   console.log('doing exif...');
   console.log(event);
+  process.env.PATH += ':'+process.env.LAMBDA_TASK_ROOT+'/bin'; // add our bin folder to path
 
   try {
     await cleanTmpDir();
@@ -52,7 +53,7 @@ module.exports.handler = async (event,context,callback) => {
     const emitter = exifDB.create({
       media: '/tmp',
       database: '/tmp/exif.json',
-      exifBinaryPath: directoryPath
+      exifBinaryPath: ''
     });
 
     let end = new Promise(function (resolve, reject) {
