@@ -1,4 +1,4 @@
-process.env.PATH += ':/var/task/bin'; // add our bin folder to path
+process.env.PATH += ':'+process.env.LAMBDA_TASK_ROOT+'/bin'; // add our bin folder to path
 const exifDB = require('exiftool-json-db');
 const download = require('./common').download;
 const cleanTmpDir = require('./common').cleanTmpDir;
