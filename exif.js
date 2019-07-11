@@ -21,6 +21,7 @@ fs.readdir(directoryPath, function (err, files) {
         // Do whatever you want to do with the file
         console.log(file); 
     });
+  });
 
 
 
