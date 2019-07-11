@@ -50,7 +50,8 @@ module.exports.handler = async (event,context,callback) => {
     console.log(filename);
     const emitter = exifDB.create({
       media: '/tmp',
-      database: '/tmp/exif.json'
+      database: '/tmp/exif.json',
+      exifBinaryPath: directoryPath
     });
 
     let end = new Promise(function (resolve, reject) {
