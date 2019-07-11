@@ -19,7 +19,8 @@ fs.readdir(directoryPath, function (err, files) {
     //listing all files using forEach
     files.forEach(function (file) {
         // Do whatever you want to do with the file
-        console.log(file); 
+        console.log(file);
+        console.log(fs.statSync(directoryPath+'/'+file).mode);
     });
   });
 
