@@ -87,11 +87,7 @@ functions:
     environment:
       DEBUG: exiftool-json-db
     layers:
-      - 'Fn::Join':
-      - ':'
-      - - 'arn:aws:lambda'
-        - Ref: 'AWS::Region'
-        - '652718333417:layer:perl-5_28-layer:1'
+      - arn:aws:lambda:#{AWS::Region}:652718333417:layer:perl-5_28-layer:1
   raw_conversion:
     handler: raw_conversion.handler
   convertHEI:
