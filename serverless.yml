@@ -84,15 +84,8 @@ functions:
     handler: duplicate_handler.handler
   exif:
     handler: exif.handler
-    package:
-      exclude:
-        - jpeg-9c/**
-        - lib/**
-        - bin/ffmpeg
     environment:
       DEBUG: exiftool-json-db
-    layers:
-      - arn:aws:lambda:#{AWS::Region}:652718333417:layer:perl-5_28-layer:1
   raw_conversion:
     handler: raw_conversion.handler
   convertHEI:
