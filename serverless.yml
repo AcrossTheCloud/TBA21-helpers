@@ -84,6 +84,11 @@ functions:
     handler: duplicate_handler.handler
   exif:
     handler: exif.handler
+    package:
+      exclude:
+        - jpeg-9c/**
+        - lib/**
+        - bin/ffmpeg
     environment:
       DEBUG: exiftool-json-db
     layers:
