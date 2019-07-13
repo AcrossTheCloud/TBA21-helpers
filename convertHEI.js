@@ -1,9 +1,7 @@
 process.env.PATH += ":"+process.env.LAMBDA_TASK_ROOT+"/bin"
-process.env.LD_LIBRARY_PATH += ":process.env.LAMBDA_TASK_ROOT"+"/lib"
+process.env.LD_LIBRARY_PATH += ":"+process.env.LAMBDA_TASK_ROOT+"/lib"
 
 const util = require('util');
-const spawn = require('child_process').spawn;
-const fs = require('fs');
 const download = require('./common').download;
 const upload = require('./common').upload;
 const execFile = util.promisify(require('child_process').execFile);
