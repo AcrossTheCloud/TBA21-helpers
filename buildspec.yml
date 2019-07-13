@@ -6,6 +6,7 @@ phases:
       - npm install
   post_build:
     commands:
+      - rm -rf test_files
       - npm install -g serverless
       - chmod -R +x bin
       - serverless deploy
