@@ -52,12 +52,12 @@ module.exports.handler = async (event, context, callback) => {
 
     // Setup query
     let query = `INSERT INTO ${process.env.PG_ITEMS_TABLE}
-        (s3_key,contributor,sha512,created_at, updated_at, md5)
-        VALUES ($1, $2, $3, current_timestamp, current_timestamp, $4)
+        (s3_key,contributor,status,sha512,created_at, updated_at, md5)
+        VALUES ($1, $2, $3, $4, current_timestamp, current_timestamp, $5)
         RETURNING s3_key;`;
 
     // Setup values
-    let values = [event.decodedSrcKey,event.decodedSrcKey.split('/')[1].split(':')[1],sha512Hash, md5];
+    let values = [event.decodedSrcKey,event.decodedSrcKey.split('/')[1].split(':')[1],false,sha512Hash, md5];
 
 
     // Execute
