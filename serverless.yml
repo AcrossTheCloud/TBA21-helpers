@@ -77,6 +77,8 @@ functions:
     handler: copy_for_vid_transcoding.handler
     environment:
       TRANSCODE_BUCKET: oceanarchive-video-on-demand-source-1xdwtz84a23si
+  create_item:
+    handler: create_item.handler
   hashes:
     handler: hashes.handler
     memorySize: 512
@@ -98,8 +100,13 @@ stepFunctions:
     hellostepfunc:
       name: TBA21FileProcessorStateMachine
       definition:
-        StartAt: Hashes
+        StartAt: CreateItem
         States:
+          CreateItem: 
+            Type: Task
+            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-create_item
+            ResultPath: '$.createResult'
+            Next: Hashes
           Hashes: 
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
@@ -108,7 +115,7 @@ stepFunctions:
           FileTypeSwitch:
             Type: Choice
             Choices:
-            - Variable: "$.hashResult.isDuplicate"
+            - Variable: "$.createResult.isDuplicate"
               BooleanEquals: true
               Next: Final State
             - Or:
