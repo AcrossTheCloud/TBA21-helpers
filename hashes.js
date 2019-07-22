@@ -17,7 +17,6 @@ module.exports.handler = async (event, context, callback) => {
   console.log('doing hashes...');
   console.log(event);
 
-  let sha512Hash;
 
   try {
 
@@ -40,41 +39,36 @@ module.exports.handler = async (event, context, callback) => {
     }
 
 
-    sha512Hash = await checksumFile('sha512', s3ObjectParams);
-
-    let md5 = await checksumFile('md5', s3ObjectParams);
-
-
-
+    const sha512Hash = await checksumFile('sha512', s3ObjectParams);
+    const md5 = await checksumFile('md5', s3ObjectParams);
 
 
 
 
     // Setup query
-    let query = `INSERT INTO ${process.env.PG_ITEMS_TABLE}
-        (s3_key,contributor,status,sha512,created_at, updated_at, md5)
-        VALUES ($1, $2, $3, $4, current_timestamp, current_timestamp, $5)
-        RETURNING s3_key;`;
+    const query = `UPDATE ${process.env.PG_ITEMS_TABLE}
+        set  ha512 = $2, 
+        md5 = $3, 
+        updated_at = current_timestamp
+        where s3_key=$1
+        RETURNING s3_key,contributor,sha512,md5;`;
 
     // Setup values
-    let values = [event.decodedSrcKey,event.decodedSrcKey.split('/')[1].split(':')[1],false,sha512Hash, md5];
+    const values = [event.createResult.db_s3_key,sha512Hash, md5];
 
 
     // Execute
     //console.log(query, values);
     let data = await db.one(query, values);
     console.log(data);
-    callback(null,  {'db_s3_key':data.s3_key , 'isDuplicate':false });
+    callback(null);
 
 
 
   }
   catch (err) {
-    if (err.detail && err.detail.indexOf("already exists")>=0)
-     callback(null, {'db_s3_key':event.decodedSrcKey , 'isDuplicate':true  });//succeed to proceed to parallel states
-    else 
-      callback(err);
-    console.log(err);
+      callback(null); //succeed anyway so that other step functions proceed
+      console.log(err);
   }
 
 }

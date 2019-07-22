@@ -38,7 +38,7 @@ module.exports.handler = async (event,context,callback) => {
     RETURNING s3_key,exif;`;
     
     // Setup values
-    let values = [event.hashResult.db_s3_key, exif ];
+    let values = [event.createResult.db_s3_key, exif ];
     
     let exifLongitude,exifLatitude;
     try{
