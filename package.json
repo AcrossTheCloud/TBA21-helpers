@@ -22,6 +22,7 @@
     "image-hash": "AcrossTheCloud/image-hash",
     "pg-promise": "^8.7.2",
     "request-promise": "^4.2.4",
+    "serverless": "^1.48.1",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
