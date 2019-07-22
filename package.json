@@ -22,10 +22,10 @@
     "image-hash": "AcrossTheCloud/image-hash",
     "pg-promise": "^8.7.2",
     "request-promise": "^4.2.4",
-    "serverless": "^1.48.1",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "serverless": "1.48.0",
     "serverless-dotenv-plugin": "^2.1.1",
     "serverless-pseudo-parameters": "^2.4.0",
     "serverless-step-functions": "^1.24.0",
