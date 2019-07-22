@@ -37,7 +37,7 @@ exports.handler = async (event,context,callback) => {
                 RETURNING s3_key,image_hash;`;
 
       // Setup values
-      let values = [event.hashResult.db_s3_key,   imgHash ];
+      let values = [event.createResult.db_s3_key,   imgHash ];
 
 
       // Execute
