@@ -47,7 +47,7 @@ exports.handler = async (event,context,callback) => {
         RETURNING s3_key, machine_recognition_tags;`;
 
         // Setup values
-        let values = [event.createResult.db_s3_key,  {'rekognition_labels': labels} ];
+        let values = [event.hashResult.db_s3_key,  {'rekognition_labels': labels} ];
 
 
         // Execute
