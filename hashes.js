@@ -61,13 +61,13 @@ module.exports.handler = async (event, context, callback) => {
     //console.log(query, values);
     let data = await db.one(query, values);
     console.log(data);
-    callback(null);
+    callback(null, { success: true });
 
 
 
   }
   catch (err) {
-      callback(null); //succeed anyway so that other step functions proceed
+      callback(null, { success: false }); //succeed anyway so that other step functions proceed
       console.log(err);
   }
 
