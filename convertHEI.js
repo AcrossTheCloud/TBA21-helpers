@@ -43,7 +43,7 @@ module.exports.handler = async(event,context,callback) => {
     
   } catch (err) {
     console.log(err);
-    callback(err);
+    callback(err); // does need to fail as subsequent steps depend on it 
   }
 
 }

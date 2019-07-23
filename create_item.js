@@ -56,7 +56,7 @@ module.exports.handler = async (event, context, callback) => {
     if (err.detail && err.detail.indexOf("already exists")>=0)
      callback(null, {'db_s3_key':event.decodedSrcKey , 'isDuplicate':true  });//succeed to proceed to parallel states
     else 
-      callback(err);
+      callback(err); // does need to fail in this case as subsequent steps depend on it
     console.log(err);
   }
 
