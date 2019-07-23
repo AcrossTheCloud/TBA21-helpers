@@ -47,7 +47,7 @@ module.exports.handler = async (event, context, callback) => {
 
     // Setup query
     const query = `UPDATE ${process.env.PG_ITEMS_TABLE}
-        set  ha512 = $2, 
+        set sha512 = $2, 
         md5 = $3, 
         updated_at = current_timestamp
         where s3_key=$1
