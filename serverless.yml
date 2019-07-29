@@ -106,74 +106,96 @@ stepFunctions:
             Type: Task
             Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-create_item
             ResultPath: '$.createResult'
-            Next: Hashes
-          Hashes: 
-            Type: Task
-            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
-            ResultPath: '$.hashResult'
-            Next: FileTypeSwitch
-          FileTypeSwitch:
-            Type: Choice
-            Choices:
-            - Variable: "$.createResult.isDuplicate"
-              BooleanEquals: true
-              Next: Final State
-            - Or:
-              - Variable: "$.isImage"
-                BooleanEquals: true
-              - Variable: "$.isVideo"
-                BooleanEquals: true
-              Next: Exif
-            Default: RawConversion
-          RawConversion:
-            Type: Task
-            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion
+            Next: Parallel
+          Parallel:
+            Type: Parallel
             Next: Final State
-          Exif:
-            Type: Task
-            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
-            ResultPath: '$.ExifResult'
-            Next: VideoOrImageSwitch
-          VideoOrImageSwitch:
-            Type: Choice
-            Choices:
-            - Variable: "$.isHEI"
-              BooleanEquals: true
-              Next: ConvertHEI
-            - Variable: "$.isVideo"
-              BooleanEquals: true
-              Next: Copy_video_for_transcoding
-            - Variable: "$.isJPEGPNG"
-              BooleanEquals: true
-              Next: ImageSizeSwitch
-            Default: Final State
-          Copy_video_for_transcoding:
-            Type: Task
-            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_video_for_transcoding
-            ResultPath: '$.videoTranscodeResult'
-            Next: Final State
-          ConvertHEI:
-            Type: Task
-            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-convertHEI
-            ResultPath: '$.convertHEIresult'
-            Next: ImageSizeSwitch
-          ImageSizeSwitch:
-            Type: Choice
-            Choices:
-            - Variable: "$.s3metadata.ContentLength"
-              NumericLessThanEquals: 15728640 #15*1024*1024
-              Next: image_tagger
-            Default: image_hashing
-          image_tagger:
-            Type: Task
-            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
-            ResultPath: '$.image_tagger_results'
-            Next: image_hashing
-          image_hashing:
-            Type: Task
-            Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_hashing
-            ResultPath: '$.imghashing_result'
-            Next: Final State
+            Branches:
+            - StartAt: Hashes
+              States:
+                Hashes: 
+                  Type: Task
+                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-hashes
+                  ResultPath: '$.hashResult'
+                  End: true
+            - StartAt: FileTypeSwitch
+              States:
+                FileTypeSwitch:
+                  Type: Choice
+                  Choices:
+                  - Variable: "$.createResult.isDuplicate"
+                    BooleanEquals: true
+                    Next: DuplicatePass
+                  - Or:
+                    - Variable: "$.isImage"
+                      BooleanEquals: true
+                    - Variable: "$.isVideo"
+                      BooleanEquals: true
+                    Next: ImageParallel
+                  Default: RawConversion
+                DuplicatePass:
+                  Type: Pass
+                  End: true
+                RawConversion:
+                  Type: Task
+                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion
+                  End: true
+                ImageParallel:
+                  Type: Parallel
+                  End: true
+                  Branches:
+                  - StartAt: Exif
+                    States:
+                      Exif:
+                        Type: Task
+                        Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
+                        ResultPath: '$.ExifResult'
+                        End: true
+                  - StartAt: VideoOrImageSwitch
+                    States:
+                      VideoOrImageSwitch:
+                        Type: Choice
+                        Choices:
+                        - Variable: "$.isHEI"
+                          BooleanEquals: true
+                          Next: ConvertHEI
+                        - Variable: "$.isVideo"
+                          BooleanEquals: true
+                          Next: Copy_video_for_transcoding
+                        - Variable: "$.isJPEGPNG"
+                          BooleanEquals: true
+                          Next: ImageSizeSwitch
+                        Default: TypeNotRecognisedPass
+                      TypeNotRecognisedPass:
+                          Type: Pass
+                          End: true
+                      Copy_video_for_transcoding:
+                        Type: Task
+                        Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_video_for_transcoding
+                        ResultPath: '$.videoTranscodeResult'
+                        End: true
+                      ConvertHEI:
+                        Type: Task
+                        Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-convertHEI
+                        ResultPath: '$.convertHEIresult'
+                        Next: ImageSizeSwitch
+                      ImageSizeSwitch:
+                        Type: Choice
+                        Choices:
+                        - Variable: "$.s3metadata.ContentLength"
+                          NumericLessThanEquals: 15728640 #15*1024*1024
+                          Next: image_tagger
+                        Default: image_hashing
+                      image_tagger:
+                        Type: Task
+                        Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
+                        ResultPath: '$.image_tagger_results'
+                        Next: image_hashing
+                      image_hashing:
+                        Type: Task
+                        Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_hashing
+                        ResultPath: '$.imghashing_result'
+                        End: true
           Final State:
             Type: Pass
             End: true
