@@ -98,7 +98,7 @@ functions:
 stepFunctions:
   stateMachines:
     hellostepfunc:
-      name: TBA21FileProcessorStateMachine
+      name: TBA21FileProcessorStateMachine-${env:STAGE, prod}
       definition:
         StartAt: CreateItem
         States:
