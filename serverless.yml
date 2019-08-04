@@ -123,9 +123,6 @@ stepFunctions:
                 FileTypeSwitch:
                   Type: Choice
                   Choices:
-                  - Variable: "$.createResult.isDuplicate"
-                    BooleanEquals: true
-                    Next: DuplicatePass
                   - Or:
                     - Variable: "$.isImage"
                       BooleanEquals: true
@@ -133,9 +130,6 @@ stepFunctions:
                       BooleanEquals: true
                     Next: ImageParallel
                   Default: RawConversion
-                DuplicatePass:
-                  Type: Pass
-                  End: true
                 RawConversion:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion
