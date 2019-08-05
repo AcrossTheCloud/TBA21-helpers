@@ -5,7 +5,22 @@ const util = require('util');
 const readdir = util.promisify(fs.readdir);
 const unlink = util.promisify(fs.unlink);
 
+cleanTmpDir = async () => {
+  const directory = '/tmp';
+  try {
+    const files = await readdir(directory);
+    const unlinkPromises = files.map(filename => unlink(`${directory}/${filename}`));
+    return Promise.all(unlinkPromises);
+  } catch (err) {
+    console.log(err);
+  }
+
+}
+
 module.exports.download = async (srcBucket, srcKey, decodedSrcKey) => {
+  await cleanTmpDir();
+  console.log('Cleaned /tmp folder.');
+  
   let filename = srcKey;
   if (filename.match(/\//)) {
     filename = filename.substring(filename.lastIndexOf('/')+1);
@@ -43,14 +58,4 @@ module.exports.upload = async (filename, key, bucket) => {
 }
 
 
-module.exports.cleanTmpDir = async () => {
-  const directory = '/tmp';
-  try {
-    const files = await readdir(directory);
-    const unlinkPromises = files.map(filename => unlink(`${directory}/${filename}`));
-    return Promise.all(unlinkPromises);
-  } catch (err) {
-    console.log(err);
-  }
 
-}
