@@ -38,7 +38,7 @@ provider:
       Action:
         - "states:StartExecution"
       Resource:
-        - Ref: TBA21FileProcessorStateMachine-${env:STAGE, prod}
+        - Ref: TBA21FileProcessorStateMachine${env:STAGE, prod}
     - Effect: "Allow"
       Action:
         - "s3:*"
@@ -98,7 +98,7 @@ functions:
 stepFunctions:
   stateMachines:
     hellostepfunc:
-      name: TBA21FileProcessorStateMachine-${env:STAGE, prod}
+      name: TBA21FileProcessorStateMachine${env:STAGE, prod}
       definition:
         StartAt: CreateItem
         States:
@@ -204,7 +204,7 @@ resources:
     TBA21FileProcessorStateMachine:
       Description: The ARN of the example state machine
       Value:
-        Ref: TBA21FileProcessorStateMachine-${env:STAGE, prod}
+        Ref: TBA21FileProcessorStateMachine${env:STAGE, prod}
 custom:
   stepFunctionsOffline:
     Hashes: hashes #(v2.0)
