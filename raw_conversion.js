@@ -29,6 +29,14 @@ module.exports.handler = async(event,context,callback) => {
 
   try {
 
+    if (event.s3metadata.ContentLength > 500000000) 
+    {
+     console.log(`ERROR: the file size for ${event.decodedSrcKey} is over 500mb, this operation might fail.`);
+     callback(null);
+     return;
+     }
+
+
     let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
     console.log(filename);
 
@@ -43,12 +51,6 @@ module.exports.handler = async(event,context,callback) => {
     if (stdout.toLowerCase().match(/raw image/)) {
       console.log('raw image detected');
 
-      if (event.s3metadata.ContentLength > 500000000)
-        {
-         console.log(`ERROR: the file size for ${event.decodedSrcKey} is over 500mb, this operation might fail.`);
-         callback(null);
-         return;
-         }
 
       let outputFile = await raw_conversion(filename);
       console.log(outputFile);
