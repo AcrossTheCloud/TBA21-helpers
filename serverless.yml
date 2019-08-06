@@ -140,7 +140,7 @@ stepFunctions:
                   Branches:
                   - StartAt: VideoOrImageTypeSwitch
                     States:
-                      VideoOrImageSwitch:
+                      VideoOrImageTypeSwitch:
                         Type: Choice
                         Choices:
                         - Variable: "$.isHEI"
