@@ -19,13 +19,17 @@ module.exports.handler = async (event,context,callback) => {
   try {
     
     if (event.s3metadata.ContentLength > 500000000)
-    console.log(`WARNING: the file size for ${event.decodedSrcKey} is over 500mb, this operation might fail.`);
+      console.log(`WARNING: the file size for ${event.decodedSrcKey} is over 500mb, this operation might fail.`);
+
+    const srcBucket=(event.isHEI ? event.convertHEIresult.convertedBucket : event.srcBucket),
+        srcKey = (event.isHEI ? event.convertHEIresult.convertedKey : event.srcKey),
+        decodedSrcKey= decodeURIComponent(srcKey.replace(/\+/g, " "));
     
-    let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
+    let filename = await download(srcBucket, srcKey, decodedSrcKey);
     console.log(filename);
     
     const getExif = util.promisify(exiftool.getExifFromLocalFileUsingNodeFs);
-    exif = await getExif(fs, filename);
+    const exif = await getExif(fs, filename);
     // Setup query
     let query = `UPDATE ${process.env.PG_ITEMS_TABLE}
     set updated_at = current_timestamp,
@@ -62,7 +66,7 @@ module.exports.handler = async (event,context,callback) => {
     let data = await db.one(query, values);
     
     console.log(data);
-    callback(null, { success: true });
+    callback(null, { success: true, "result":exif });
     //return data; //no need for return here ? 
   }
   catch (err) {

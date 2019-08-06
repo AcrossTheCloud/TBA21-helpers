@@ -9,7 +9,7 @@ module.exports.start = async (event, context, callback) => {
   const s3Record = event.Records[0].s3;
   const srcBucket = s3Record.bucket.name;
   const srcKey = s3Record.object.key; 
-  const decodedSrcKey = decodeURIComponent(s3Record.object.key.replace(/\+/g, " "));
+  const decodedSrcKey = decodeURIComponent(srcKey.replace(/\+/g, " "));
 
 
   let data = await s3.headObject({ Bucket: srcBucket, Key: decodedSrcKey }).promise();
