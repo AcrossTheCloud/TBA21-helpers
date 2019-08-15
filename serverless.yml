@@ -140,16 +140,9 @@ stepFunctions:
                   Type: Parallel
                   End: true
                   Branches:
-                  - StartAt: Exif
+                  - StartAt: VideoOrImageTypeSwitch
                     States:
-                      Exif:
-                        Type: Task
-                        Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
-                        ResultPath: '$.ExifResult'
-                        End: true
-                  - StartAt: VideoOrImageSwitch
-                    States:
-                      VideoOrImageSwitch:
+                      VideoOrImageTypeSwitch:
                         Type: Choice
                         Choices:
                         - Variable: "$.isHEI"
@@ -160,11 +153,11 @@ stepFunctions:
                           Next: Copy_video_for_transcoding
                         - Variable: "$.isJPEGPNG"
                           BooleanEquals: true
-                          Next: ImageSizeSwitch
+                          Next: HashingTaggingExifParallel
                         Default: TypeNotRecognisedPass
                       TypeNotRecognisedPass:
-                          Type: Pass
-                          End: true
+                        Type: Pass
+                        End: true
                       Copy_video_for_transcoding:
                         Type: Task
                         Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-copy_video_for_transcoding
@@ -174,24 +167,42 @@ stepFunctions:
                         Type: Task
                         Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-convertHEI
                         ResultPath: '$.convertHEIresult'
-                        Next: ImageSizeSwitch
-                      ImageSizeSwitch:
-                        Type: Choice
-                        Choices:
-                        - Variable: "$.s3metadata.ContentLength"
-                          NumericLessThanEquals: 15728640 #15*1024*1024
-                          Next: image_tagger
-                        Default: image_hashing
-                      image_tagger:
-                        Type: Task
-                        Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
-                        ResultPath: '$.image_tagger_results'
-                        Next: image_hashing
-                      image_hashing:
-                        Type: Task
-                        Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_hashing
-                        ResultPath: '$.imghashing_result'
+                        Next: HashingTaggingExifParallel
+                      HashingTaggingExifParallel:
+                        Type: Parallel
                         End: true
+                        Branches:
+                        - StartAt: Exif
+                          States:
+                            Exif:
+                              Type: Task
+                              Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
+                              ResultPath: '$.ExifResult'
+                              End: true
+                        - StartAt: SizeWithinLimit
+                          States:
+                            SizeWithinLimit:
+                              Type: Choice
+                              Choices:
+                              - Variable: "$.s3metadata.ContentLength"
+                                NumericLessThanEquals: 15728640 #15*1024*1024
+                                Next: image_tagger
+                              Default: FileTooLargePass
+                            image_tagger:
+                              Type: Task
+                              Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_tagger
+                              ResultPath: '$.image_tagger_results'
+                              End: true
+                            FileTooLargePass:
+                              Type: Pass
+                              End: true
+                        - StartAt: image_hashing
+                          States:
+                            image_hashing:
+                              Type: Task
+                              Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_hashing
+                              ResultPath: '$.imghashing_result'
+                              End: true
           Final State:
             Type: Pass
             End: true
