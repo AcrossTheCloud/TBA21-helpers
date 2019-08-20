@@ -16,6 +16,10 @@ service: TBA21-helpers # NOTE: update this with your service name
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
+package:
+  individually: true
+  exclude:
+    - node_modules/exiftool.js/**
 
 provider:
   name: aws
@@ -88,6 +92,9 @@ functions:
     handler: duplicate_handler.handler
   exif:
     handler: exif.handler
+    package:
+      include:
+        - node_modules/exiftool.js/**
     environment:
       DEBUG: exiftool-json-db
   raw_conversion:
