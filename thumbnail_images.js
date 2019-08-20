@@ -47,7 +47,7 @@ module.exports.handler = async(event,context,callback) => {
 
       const newKey = s3ObjectParams.Key + '.thumbnail.png';
 
-      let writeStream = uploadFromStream(process.env.THUMBNAIL_BUCKET, newKey)
+      let writeStream = s3WriteableStream(process.env.THUMBNAIL_BUCKET, newKey)
 
       readableStream.pipe(transformer).on('error', (err) => {
         reject(err);
