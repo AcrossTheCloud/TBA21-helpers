@@ -17,7 +17,6 @@ service: TBA21-helpers # NOTE: update this with your service name
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
 package:
-  individually: true
   exclude:
     - node_modules/exiftool.js/**
 
@@ -93,6 +92,11 @@ functions:
   exif:
     handler: exif.handler
     package:
+      individually: true
+      exclude:
+        - node_modules/sharp/**
+        - node_modules/uuid/**
+        - node_modules/image-hash/**
       include:
         - node_modules/exiftool.js/**
     environment:
