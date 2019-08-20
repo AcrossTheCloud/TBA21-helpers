@@ -1,43 +1,69 @@
-process.env.PATH += ":"+process.env.LAMBDA_TASK_ROOT+"/bin"
-process.env.LD_LIBRARY_PATH += ":"+process.env.LAMBDA_TASK_ROOT+"/lib"
+// process.env.PATH += ":"+process.env.LAMBDA_TASK_ROOT+"/bin"
+// process.env.LD_LIBRARY_PATH += ":"+process.env.LAMBDA_TASK_ROOT+"/lib"
 
-const util = require('util');
-const download = require('./common').download;
-const upload = require('./common').upload;
-const execFile = util.promisify(require('child_process').execFile);
+const stream = require('stream');
+const AWS = require('aws-sdk');
+const sharp = require('sharp');
+const s3 = new AWS.S3();
+
+const s3WriteableStream = (destBucket, destKey) => {
+  let pass = new stream.PassThrough();
+
+  let params = {Bucket: destBucket, Key: destKey, Body: pass};
+  s3.upload(params, function(err, data) {
+    console.log('in upload callback');
+    console.log(err, data);
+  });
+
+  return pass;
+}
 
 
 module.exports.handler = async(event,context,callback) => {
 
-  console.log('doing convertHEI');
+  console.log('doing image thumbnailing');
   console.log(event);
 
   try {
 
-    if (event.s3metadata.ContentLength > 500000000)
-     console.log(`WARNING: the file size for ${event.decodedSrcKey} is over 500mb, this operation might fail.`);
 
-
-    let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
-    console.log(filename);
-    let outputFile = filename.substring(0, filename.lastIndexOf('.')) + '.jpg';
-    console.log(outputFile);
-
-    const { error, stdout, stderr } = await execFile('/var/task/bin/tifig-static-0.2.2/tifig', ['-v','-p',filename,outputFile]);
-    if (error) {
-      console.log(error.code);
-      console.log(stderr);
-      console.log(stdout);
-      throw new Error(error);
+    let s3ObjectParams = {
+      Bucket: event.srcBucket,
+      Key: event.decodedSrcKey
     }
 
+    const readTransofrmWrite = new Promise((resolve, reject) => {
+
+      let readableStream = s3.getObject(s3ObjectParams).createReadStream().on('error', (err) => {
+        reject(err);
+      });
+
+      let transformer = sharp()
+        .resize(200, 200)
+        .png()
+        .on('info', function (info) {
+          console.log('Image height is ' + info.height);
+        });
+
+      const newKey = s3ObjectParams.Key + '.thumbnail.png';
+
+      let writeStream = uploadFromStream(process.env.THUMBNAIL_BUCKET, newKey)
+
+      readableStream.pipe(transformer).on('error', (err) => {
+        reject(err);
+      }).pipe(writeStream).on('error', (err) => {
+        reject(err);
+      }).on('finish', () => {
+        resolve(newKey);
+      });
 
 
 
-      let uploadKey = event.srcKey.substring(0, event.srcKey.lastIndexOf('.')) + '.jpg';
-      let put = await upload(outputFile, uploadKey, process.env.CONVERSION_BUCKET);
-      console.log(put);
-      callback(null,{convertedBucket: process.env.CONVERSION_BUCKET, convertedKey:uploadKey });
+    });
+
+    let data=await readTransofrmWrite;
+
+    callback(null,{ key: data });
 
 
     
