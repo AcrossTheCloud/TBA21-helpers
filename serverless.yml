@@ -95,7 +95,6 @@ functions:
       individually: true
       exclude:
         - node_modules/sharp/**
-        - node_modules/uuid/**
         - node_modules/image-hash/**
       include:
         - node_modules/exiftool.js/**
