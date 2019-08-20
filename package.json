@@ -20,7 +20,6 @@
   "dependencies": {
     "exif": "^0.6.0",
     "exiftool.js": "^0.3.0",
-    "fast-exif": "^1.0.1",
     "image-hash": "AcrossTheCloud/image-hash",
     "pg-promise": "^8.7.2",
     "request-promise": "^4.2.4",
