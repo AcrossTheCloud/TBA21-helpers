@@ -96,6 +96,11 @@ functions:
     handler: convertHEI.handler
     environment:
       CONVERSION_BUCKET: tba21-helpers-heictojpeg-${env:STAGE, prod}
+  thumbnail_images:
+    handler: thumbnail_images.handler
+    environment:
+      THUMBNAIL_BUCKET: thumbnails.ocean-archive.org
+
 
 stepFunctions:
   stateMachines:
@@ -178,6 +183,13 @@ stepFunctions:
                               Type: Task
                               Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
                               ResultPath: '$.ExifResult'
+                              End: true
+                        - StartAt: Thumbnail
+                          States:
+                            Thumbnail:
+                              Type: Task
+                              Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-thumbnail_images
+                              ResultPath: '$.ThumbnailResult'
                               End: true
                         - StartAt: SizeWithinLimit
                           States:
