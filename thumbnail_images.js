@@ -45,9 +45,7 @@ module.exports.handler = async(event,context,callback) => {
       let readableStream = s3.getObject(s3ObjectParams).createReadStream().on('error', (err) => {
         reject(err);
       });
-      readableStream.pipe(metaReader).on('error', (err) => {
-        reject(err);
-      });
+      readableStream.pipe(metaReader);
 
 
     });
