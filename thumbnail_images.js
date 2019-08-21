@@ -47,25 +47,27 @@ module.exports.handler = async(event,context,callback) => {
       let readableStream = s3.getObject(s3ObjectParams).createReadStream().on('error', (err) => {
         reject(err);
       });
-      readableStream.pipe(metaReader);
+      readableStream.pipe(metaReader).on('error', (err) => {
+        reject(err);
+      });
 
 
     });
 
-    const readTransofrmWrite = new Promise((resolve, reject) => {
+    const readTransofrmWrite = (targetWdith) => (new Promise((resolve, reject) => {
 
       let readableStream = s3.getObject(s3ObjectParams).createReadStream().on('error', (err) => {
         reject(err);
       });
 
       let transformer = sharp()
-        .resize(200, 200)
+        .resize(targetWdith)
         .png()
         .on('info', function (info) {
-          console.log('Image height is ' + info.height);
+          //console.log('Image height is ' + info.height);
         });
 
-      const newKey = s3ObjectParams.Key + '.thumbnail.png';
+      const newKey = s3ObjectParams.Key + '.thumbnail'+targetWdith+'.png';
 
       let writeStream = s3WriteableStream(process.env.THUMBNAIL_BUCKET, newKey)
 
@@ -79,14 +81,31 @@ module.exports.handler = async(event,context,callback) => {
 
 
 
-    });
+    }));
 
-    let imageMeta= await getImageMetaData;
-    console.log(imageMeta);
+    let imageMetaData = await getImageMetaData;
+    console.log(imageMetaData);
+    let resolvedData=[];
+    
+    switch (true) {
+      case (imageMetaData.width > 1140):
+        resolvedData.push(await readTransofrmWrite(1140));
+        console.log(resolvedData);
+      case (imageMetaData.width > 960):
+        resolvedData.push(await readTransofrmWrite(960));
+        console.log(resolvedData);
+      case (imageMetaData.width > 720):
+        resolvedData.push(await readTransofrmWrite(720));
+        console.log(resolvedData);
+      case (imageMetaData.width > 540):
+        resolvedData.push(await readTransofrmWrite(540));
+        console.log(resolvedData);
 
-    let data=await readTransofrmWrite;
+    }
 
-    callback(null,{ key: data });
+
+
+    callback(null,{ key: resolvedData });
 
 
     
