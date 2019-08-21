@@ -32,6 +32,26 @@ module.exports.handler = async(event,context,callback) => {
       Key: event.decodedSrcKey
     }
 
+    const getImageMetaData = new Promise((resolve, reject) => {
+      const metaReader = sharp()
+        .metadata()
+        .then(info => {
+          resolve(info)
+        })
+        .catch(err => {
+          reject(err)
+        });
+
+      let readableStream = s3.getObject(s3ObjectParams).createReadStream().on('error', (err) => {
+        reject(err);
+      });
+      readableStream.pipe(metaReader).on('error', (err) => {
+        reject(err);
+      });
+
+
+    });
+
     const readTransofrmWrite = new Promise((resolve, reject) => {
 
       let readableStream = s3.getObject(s3ObjectParams).createReadStream().on('error', (err) => {
@@ -60,6 +80,9 @@ module.exports.handler = async(event,context,callback) => {
 
 
     });
+
+    let imageMeta= await getImageMetaData;
+    console.log(imageMeta);
 
     let data=await readTransofrmWrite;
 
