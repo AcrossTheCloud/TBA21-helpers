@@ -33,12 +33,14 @@ module.exports.handler = async(event,context,callback) => {
     }
 
     const getImageMetaData = new Promise((resolve, reject) => {
-      const metaReader = sharp()
+
+      const metaReader = sharp();
+
+      metaReader
         .metadata()
         .then(info => {
           resolve(info)
-        })
-        .catch(err => {
+        }).catch(err => {
           reject(err)
         });
 
