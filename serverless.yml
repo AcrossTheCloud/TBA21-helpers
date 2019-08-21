@@ -109,6 +109,7 @@ functions:
       CONVERSION_BUCKET: tba21-helpers-heictojpeg-${env:STAGE, prod}
   thumbnail_images:
     handler: thumbnail_images.handler
+    memorySize: 1024
     environment:
       THUMBNAIL_BUCKET: thumbnails.ocean-archive.org
 
