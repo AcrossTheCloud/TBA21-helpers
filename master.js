@@ -17,7 +17,7 @@ module.exports.start = async (event, context, callback) => {
   let isHEI=Boolean(decodedSrcKey.toLowerCase().match(/\.hei[cf]$/));
   let isImage= Boolean(data.ContentType.toLowerCase().match(/image/) || isHEI);
   let isJPEGPNG = Boolean(decodedSrcKey.toLowerCase().match(/(\.png|\.jpg|\.jpeg)$/));
-  let isVideo = Boolean(decodedSrcKey.toLowerCase().match(/\.mp.*/));
+  let isVideo = Boolean(data.ContentType.toLowerCase().match(/video/));
 
   const params = {
     stateMachineArn: process.env.stateMachineArn,
