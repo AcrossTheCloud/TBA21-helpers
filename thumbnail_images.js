@@ -5,6 +5,9 @@ const stream = require('stream');
 const AWS = require('aws-sdk');
 const sharp = require('sharp');
 const s3 = new AWS.S3();
+const pgp = require('pg-promise')();
+const cn = `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}?ssl=${process.env.PGSSL}`;
+const db = pgp(cn);
 
 const s3WriteableStream = (destBucket, destKey) => {
   let pass = new stream.PassThrough();
@@ -54,20 +57,20 @@ module.exports.handler = async(event,context,callback) => {
 
     });
 
-    const readTransofrmWrite = (targetWdith) => (new Promise((resolve, reject) => {
+    const readTransofrmWrite = (targetWidth) => (new Promise((resolve, reject) => {
 
       let readableStream = s3.getObject(s3ObjectParams).createReadStream().on('error', (err) => {
         reject(err);
       });
 
       let transformer = sharp()
-        .resize(targetWdith)
+        .resize(targetWidth)
         .png()
         .on('info', function (info) {
           //console.log('Image height is ' + info.height);
         });
 
-      const newKey = s3ObjectParams.Key + '.thumbnail'+targetWdith+'.png';
+      const newKey = s3ObjectParams.Key + '.thumbnail'+targetWidth+'.png';
 
       let writeStream = s3WriteableStream(process.env.THUMBNAIL_BUCKET, newKey)
 
@@ -85,7 +88,23 @@ module.exports.handler = async(event,context,callback) => {
 
     let imageMetaData = await getImageMetaData;
     console.log(imageMetaData);
-    let resolvedData=[];
+
+    // Setup query
+    const query = `UPDATE ${process.env.PG_ITEMS_TABLE}
+    set updated_at = current_timestamp,
+    file_dimensions =  $2
+    where s3_key=$1
+    RETURNING s3_key,file_dimensions;`;
+    
+    // Setup values
+    const values = [event.createResult.db_s3_key, [imageMetaData.width, imageMetaData.height]];
+
+    // Execute
+    console.log(query, values);
+    let data = await db.one(query, values);
+    console.log(data);
+
+    let resolvedData = [];
     
     switch (true) {
       case (imageMetaData.width > 1140):
