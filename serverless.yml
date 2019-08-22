@@ -83,7 +83,7 @@ functions:
   copy_video_for_transcoding:
     handler: copy_for_vid_transcoding.handler
     environment:
-      TRANSCODE_BUCKET: oceanarchive-video-on-demand-source-1xdwtz84a23si
+      TRANSCODE_BUCKET: oceanarchive-vod-source-1ma7gv7bdyc23
   create_item:
     handler: create_item.handler
   hashes:
