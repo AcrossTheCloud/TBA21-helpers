@@ -16,10 +16,13 @@ service: TBA21-helpers # NOTE: update this with your service name
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
+package:
+  exclude:
+    - node_modules/exiftool.js/**
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs10.x
   region: ${env:REGION, eu-central-1}
   stage: ${env:STAGE, prod}
   timeout: 900
@@ -51,6 +54,8 @@ provider:
         - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si"
         - "arn:aws:s3:::tba21-helpers-heictojpeg*/*"
         - "arn:aws:s3:::tba21-helpers-heictojpeg*"
+        - "arn:aws:s3:::thumbnails.ocean-archive.org*"
+        - "arn:aws:s3:::thumbnails.ocean-archive.org*/*"
     - Effect: "Allow"
       Action: "rekognition:DetectLabels"
       Resource: "*"
@@ -87,7 +92,15 @@ functions:
   duplicate_handler:
     handler: duplicate_handler.handler
   exif:
+    runtime: nodejs8.10
     handler: exif.handler
+    package:
+      individually: true
+      exclude:
+        - node_modules/sharp/**
+        - node_modules/image-hash/**
+      include:
+        - node_modules/exiftool.js/**
     environment:
       DEBUG: exiftool-json-db
   raw_conversion:
@@ -96,6 +109,12 @@ functions:
     handler: convertHEI.handler
     environment:
       CONVERSION_BUCKET: tba21-helpers-heictojpeg-${env:STAGE, prod}
+  thumbnail_images:
+    handler: thumbnail_images.handler
+    memorySize: 1024
+    environment:
+      THUMBNAIL_BUCKET: thumbnails.ocean-archive.org
+
 
 stepFunctions:
   stateMachines:
@@ -178,6 +197,13 @@ stepFunctions:
                               Type: Task
                               Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-exif
                               ResultPath: '$.ExifResult'
+                              End: true
+                        - StartAt: Thumbnail
+                          States:
+                            Thumbnail:
+                              Type: Task
+                              Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-thumbnail_images
+                              ResultPath: '$.ThumbnailResult'
                               End: true
                         - StartAt: SizeWithinLimit
                           States:
