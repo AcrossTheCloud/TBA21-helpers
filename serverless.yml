@@ -48,8 +48,8 @@ provider:
       Resource:
         - "arn:aws:s3:::oceanarchive-demo-dev/*"
         - "arn:aws:s3:::oceanarchive-demo-dev"
-        - "arn:aws:s3:::oceanarchive-demo/*"
-        - "arn:aws:s3:::oceanarchive-demo"
+        - "arn:aws:s3:::ocean-archive-prod-content/*"
+        - "arn:aws:s3:::ocean-archive-prod-content"
         - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si/*"
         - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si"
         - "arn:aws:s3:::tba21-helpers-heictojpeg*/*"
