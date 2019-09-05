@@ -23,8 +23,8 @@ package:
 provider:
   name: aws
   runtime: nodejs10.x
-  region: ${env:REGION, eu-central-1}
-  stage: ${env:STAGE, prod}
+  region: ${env:REGION, 'eu-central-1'}
+  stage: ${env:STAGE, 'prod'}
   timeout: 900
   memorySize: 256
   versionFunctions: false
