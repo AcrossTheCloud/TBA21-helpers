@@ -58,7 +58,7 @@ module.exports.handler = async (event, context, callback) => {
 
         allPartsResult.push({ ETag: partUploadData.CopyPartResult.ETag, PartNumber: partNumber });
         rangeStart = rangeEnd + 1;
-        rangeEnd = (partNumber === nChunks) ? (objectSize-1) : rangeEnd + chunkSize;
+        rangeEnd = (partNumber === (nChunks-1)) ? (objectSize-1) : rangeEnd + chunkSize;
 
       }
 
