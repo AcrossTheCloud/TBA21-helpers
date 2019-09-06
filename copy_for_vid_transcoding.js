@@ -58,7 +58,7 @@ module.exports.handler = async (event, context, callback) => {
 
         allPartsResult.push({ ETag: partUploadData.CopyPartResult.ETag, PartNumber: partNumber });
         rangeStart = rangeEnd + 1;
-        rangeEnd = (partNumber === nChunks) ? objectSize : rangeEnd + chunkSize;
+        rangeEnd = (partNumber === nChunks) ? (objectSize-1) : rangeEnd + chunkSize;
 
       }
 
@@ -85,6 +85,7 @@ module.exports.handler = async (event, context, callback) => {
         Key: params.Key,
         UploadId: uploadId
       }).promise();
+      console.log('Aborted successfully.');
       console.log(abortData);
     }
 
