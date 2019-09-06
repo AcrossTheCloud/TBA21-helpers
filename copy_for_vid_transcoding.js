@@ -4,7 +4,7 @@ const COPY_SIZE_LIMIT = (5 * 1024 * 1024 * 1024); //5GB
 
 module.exports.handler = async (event, context, callback) => {
 
-  const objectSize = event.s3metadata.ContentLength;
+  const objectSize = Number(event.s3metadata.ContentLength);
 
   console.log('Doing copy_for_vid_transcoding ...');
   let uploadId = null;
@@ -31,7 +31,7 @@ module.exports.handler = async (event, context, callback) => {
 
       uploadId = data.UploadId;
       let allPartsResult = [];
-      let nChunks = Math.floor(Number(objectSize) / COPY_SIZE_LIMIT) + 1;
+      let nChunks = Math.floor(objectSize / COPY_SIZE_LIMIT) + 1;
       let chunkSize = Math.round(objectSize / nChunks);
       let rangeStart = 0;
       let rangeEnd = chunkSize;
