@@ -9,12 +9,12 @@ module.exports.handler = async (event, context, callback) => {
   console.log('Doing copy_for_vid_transcoding ...');
   let uploadId = null;
   let completeData = null;
-  try {
+  const params = {
+    Bucket: process.env.TRANSCODE_BUCKET,
+    Key: event.decodedSrcKey
+  };
 
-    const params = {
-      Bucket: process.env.TRANSCODE_BUCKET,
-      Key: event.decodedSrcKey
-    };
+  try {
 
     if (objectSize < COPY_SIZE_LIMIT) {
       console.log('Uploading small file (<5GB)...');
@@ -31,7 +31,7 @@ module.exports.handler = async (event, context, callback) => {
 
       uploadId = data.UploadId;
       let allPartsResult = [];
-      let nChunks = Math.floor(Numbert(objectSize) / COPY_SIZE_LIMIT) + 1;
+      let nChunks = Math.floor(Number(objectSize) / COPY_SIZE_LIMIT) + 1;
       let chunkSize = Math.round(objectSize / nChunks);
       let rangeStart = 0;
       let rangeEnd = chunkSize;
@@ -41,10 +41,9 @@ module.exports.handler = async (event, context, callback) => {
         rangeString = `bytes=${rangeStart}-${rangeEnd}`;
 
         const copyParams = {
-          Bucket: params.Bucket,
+          ...params,
           CopySource: `/${event.srcBucket}/${event.srcKey}`,
           CopySourceRange: rangeString,
-          Key: params.Key,
           PartNumber: partNumber,
           UploadId: uploadId
         };
@@ -64,8 +63,7 @@ module.exports.handler = async (event, context, callback) => {
       }
 
       var completeParams = {
-        Bucket: params.Bucket,
-        Key: params.Key,
+        ...params,
         MultipartUpload: {
           Parts: allPartsResult
         },
