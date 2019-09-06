@@ -23,8 +23,8 @@ package:
 provider:
   name: aws
   runtime: nodejs10.x
-  region: ${env:REGION, eu-central-1}
-  stage: ${env:STAGE, prod}
+  region: ${env:REGION, 'eu-central-1'}
+  stage: ${env:STAGE, 'prod'}
   timeout: 900
   memorySize: 256
   versionFunctions: false
@@ -50,12 +50,14 @@ provider:
         - "arn:aws:s3:::oceanarchive-demo-dev"
         - "arn:aws:s3:::ocean-archive-prod-content/*"
         - "arn:aws:s3:::ocean-archive-prod-content"
-        - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si/*"
-        - "arn:aws:s3:::oceanarchive-video-on-demand-source-1xdwtz84a23si"
+        - "arn:aws:s3:::oceanarchive-vod-source-1ma7gv7bdyc23/*"
+        - "arn:aws:s3:::oceanarchive-vod-source-1ma7gv7bdyc23"
         - "arn:aws:s3:::tba21-helpers-heictojpeg*/*"
         - "arn:aws:s3:::tba21-helpers-heictojpeg*"
         - "arn:aws:s3:::thumbnails.ocean-archive.org*"
         - "arn:aws:s3:::thumbnails.ocean-archive.org*/*"
+        - "arn:aws:s3:::audio.ocean-archive.org*"
+        - "arn:aws:s3:::audio.ocean-archive.org*/*"
     - Effect: "Allow"
       Action: "rekognition:DetectLabels"
       Resource: "*"
@@ -105,6 +107,10 @@ functions:
       DEBUG: exiftool-json-db
   raw_conversion:
     handler: raw_conversion.handler
+  wav_conversion:
+    handler: generate_m4a.handler
+    environment:
+      M4A_BUCKET: audio.ocean-archive.org
   convertHEI:
     handler: convertHEI.handler
     environment:
@@ -150,10 +156,17 @@ stepFunctions:
                     - Variable: "$.isVideo"
                       BooleanEquals: true
                     Next: ImageParallel
+                  - Variable: "$.isWav"
+                    BooleanEquals: true
+                    Next: WavConversion
                   Default: RawConversion
                 RawConversion:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion
+                  End: true
+                WavConversion:
+                  Type: Task
+                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-wav_conversion
                   End: true
                 ImageParallel:
                   Type: Parallel
