@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 const COPY_SIZE_LIMIT = (5 * 1024 * 1024 * 1024); //5GB
 
-module.exports.handler = (event, context, callback) => {
+module.exports.handler = async (event, context, callback) => {
 
   const objectSize = event.s3metadata.ContentLength;
 
