@@ -5,7 +5,7 @@ const upload = require('./common').upload;
 
 const generateM4A = async (file) => {
   const outputFile = file.substring(0,file.lastIndexOf('.'))+'.m4a';
-  const { error, stdout, stderr } = await execFile('bin/ffmpeg',['-i', file, '-c:a', 'libfdk_aac', '-b:a', '128k', outputFile]);
+  const { error, stdout, stderr } = await execFile('bin/ffmpeg',['-i', file, '-c:a', 'aac', '-b:a', '128k', outputFile]);
   if (error) {
     console.log(error.code);
     console.log(stderr);
