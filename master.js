@@ -18,7 +18,13 @@ module.exports.start = async (event, context, callback) => {
   let isImage= Boolean(data.ContentType.toLowerCase().match(/image/) || isHEI);
   let isJPEGPNG = Boolean(decodedSrcKey.toLowerCase().match(/(\.png|\.jpg|\.jpeg)$/));
   let isVideo = Boolean(data.ContentType.toLowerCase().match(/video/));
-  let isWav = Boolean(decodedSrcKey.match(/\.wav$/i));
+  let isWav = Boolean(
+    data.ContentType.match(/audio\/wave/i) ||
+    data.ContentType.match(/audio\/wav/i) ||
+    data.ContentType.match(/audio\/x-wav/i) ||
+    data.ContentType.match(/audio\/x-pn-wav/i) ||
+    decodedSrcKey.match(/\.wav$/i)
+  );
 
   const params = {
     stateMachineArn: process.env.stateMachineArn,
