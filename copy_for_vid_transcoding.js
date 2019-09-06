@@ -1,7 +1,10 @@
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
+const COPY_SIZE_LIMIT = (5 * 1024 * 1024 * 1024); //5GB
 
 module.exports.handler = (event, context, callback) => {
+
+  const objectSize = event.s3metadata.ContentLength;
 
   console.log('Doing copy_for_vid_transcoding ...');
   let uploadId = null;
@@ -13,54 +16,50 @@ module.exports.handler = (event, context, callback) => {
       Key: event.decodedSrcKey
     };
 
-    if (event.s3metadata.ContentLength < (5 * 1024 * 1024 * 1024)) {
+    if (objectSize < COPY_SIZE_LIMIT) {
+      console.log('Uploading small file (<5GB)...');
       console.log(params);
-      const completeData = await s3.copyObject(params).promise();
+      completeData = await s3.copyObject(params).promise();
     }
     else {
+
 
 
       const data = await s3.createMultipartUpload(params).promise();
 
       console.log(data);           // successful response
-      /* should return:
-  data = {
-   Bucket: "examplebucket", 
-   Key: "largeobject", 
-   UploadId: "ibZBv_75gd9r8lH_gqXatLdxMVpAlj6ZQjEs.OwyF3953YdwbcQnMA2BLGn8Lx12fQNICtMw5KyteFeHw.Sjng--"
-  }
-  */
 
       uploadId = data.UploadId;
-      let partCounter = 0;
       let allPartsResult = [];
+      let nChunks = Math.floor(Numbert(objectSize) / COPY_SIZE_LIMIT) + 1;
+      let chunkSize = Math.round(objectSize / nChunks);
+      let rangeStart = 0;
+      let rangeEnd = chunkSize;
+      let rangeString;
 
+      for (let partNumber = 1; partNumber <= nChunks; partNumber++) {
+        rangeString = `bytes=${rangeStart}-${rangeEnd}`;
 
-
-      while (true) {
-        partCounter++;
         const copyParams = {
           Bucket: params.Bucket,
           CopySource: `/${event.srcBucket}/${event.srcKey}`,
+          CopySourceRange: rangeString,
           Key: params.Key,
-          PartNumber: partCounter,
+          PartNumber: partNumber,
           UploadId: uploadId
         };
+
+        console.log('Uploading ...');
+        console.log(copyParams);
 
         const partUploadData = await s3.uploadPartCopy(copyParams).promise();
 
         console.log(partUploadData);           // successful response
-        /*
-        data = {
-         CopyPartResult: {
-          ETag: "\"b0c6f0e7e054ab8fa2536a2677f8734d\"", 
-          LastModified: <Date Representation>
-         }
-        }
-        */
-        if (!partUploadData.CopyPartResult)
-          break;
-        allPartsResult.push({ ETag: partUploadData.CopyPartResult.ETag, PartNumber: partCounter });
+        console.log('...done.');
+
+        allPartsResult.push({ ETag: partUploadData.CopyPartResult.ETag, PartNumber: partNumber });
+        rangeStart = rangeEnd + 1;
+        rangeEnd = (partNumber === nChunks) ? objectSize : rangeEnd + chunkSize;
 
       }
 
@@ -72,16 +71,9 @@ module.exports.handler = (event, context, callback) => {
         },
         UploadId: uploadId
       };
-      completeData = await s3.completeMultipartUpload(completeParams)
+      completeData = await s3.completeMultipartUpload(completeParams).promise();
       console.log(completeData);           // successful response
-      /*
-      data = {
-       Bucket: "acexamplebucket", 
-       ETag: "\"4d9031c7644d8081c2829f4ea23c55f7-2\"", 
-       Key: "bigobject", 
-       Location: "https://examplebucket.s3.amazonaws.com/bigobject"
-      }
-      */
+
 
     }
 
@@ -94,7 +86,7 @@ module.exports.handler = (event, context, callback) => {
         Bucket: params.Bucket,
         Key: params.Key,
         UploadId: uploadId
-      });
+      }).promise();
       console.log(abortData);
     }
 
