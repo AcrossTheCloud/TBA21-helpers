@@ -21,7 +21,7 @@ module.exports.handler = async (event, context, callback) => {
 
     let cuuid;
     try{
-     cuuid=event.decodedSrcKey.split('/')[1].split(':')[1];
+     cuuid=event.decodedSrcKey.split('/')[2];
      if (!isValidUUID(cuuid))
        cuuid=null;
       
