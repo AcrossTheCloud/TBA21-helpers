@@ -18,8 +18,12 @@ module.exports.handler = async (event, context, callback) => {
 
     if (objectSize < COPY_SIZE_LIMIT) {
       console.log('Uploading small file (<5GB)...');
-      console.log(params);
-      completeData = await s3.copyObject(params).promise();
+      const copyParams = {
+        ...params,
+        CopySource: `/${event.srcBucket}/${event.srcKey}`
+      }
+      console.log(copyParams);
+      completeData = await s3.copyObject(copyParams).promise();
     }
     else {
 
