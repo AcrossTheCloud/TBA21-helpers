@@ -20,16 +20,16 @@
   "dependencies": {
     "exiftool.js": "^0.3.0",
     "image-hash": "AcrossTheCloud/image-hash",
-    "pg-promise": "^8.7.2",
+    "pg-promise": "^9.1.4",
     "request-promise": "^4.2.4",
     "sharp": "^0.23.0",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "serverless": "1.48.3",
+    "serverless": "1.51.0",
     "serverless-dotenv-plugin": "^2.1.1",
     "serverless-pseudo-parameters": "^2.4.0",
-    "serverless-step-functions": "^1.24.0",
+    "serverless-step-functions": "^2.6.0",
     "serverless-step-functions-offline": "^2.1.2"
   }
 }
