@@ -43,41 +43,52 @@ module.exports.handler = async (event, context, callback) => {
     let type = null;
 
     switch (true) {
-      case (/image/i.match(event.data.ContentType)):
+      case (/image/i.match(event.s3metadata.ContentType)):
         type = 'Image';
         break;
-      case (/audio/i.match(event.data.ContentType)):
+      case (/audio/i.match(event.s3metadata.ContentType)):
         type = 'Audio';
         break;
-      case (/video/i.match(event.data.ContentType)):
+      case (/video/i.match(event.s3metadata.ContentType)):
         type = 'Video';
         break;
       case (downloadTextTypes.reduce(
         (overall, item) => {
-          return overall || (new RegExp(item), "i").match(event.data.ContentType)
+          return overall || (new RegExp(item), "i").match(event.s3metadata.ContentType)
         },
         false
       )):
         type = 'DownloadText'
         break;
-      case (/text/i.match(event.data.ContentType)):
+      case (/text/i.match(event.s3metadata.ContentType)):
         type = 'Text';
         break;
-      case(/pdf/i.match(event.data.ContentType)):
+      case(/pdf/i.match(event.s3metadata.ContentType)):
         type = 'PDF'
         break;
       default:
         break;
     }
 
+    let query, values;
     // Setup query
-    let query = `INSERT INTO ${process.env.PG_ITEMS_TABLE}
-        (s3_key,status, contributor, item_type created_at, updated_at)
-        VALUES ($1, $2, $3, $4, current_timestamp, current_timestamp)
-        RETURNING s3_key;`;
+    if (type) {
+      query = `INSERT INTO ${process.env.PG_ITEMS_TABLE}
+          (s3_key,status, contributor, item_type, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, current_timestamp, current_timestamp)
+          RETURNING s3_key;`;
 
-    // Setup values
-    let values = [event.decodedSrcKey,false,cuuid,type];
+      // Setup values
+      values = [event.decodedSrcKey,false,cuuid,type];
+    } else {
+      query = `INSERT INTO ${process.env.PG_ITEMS_TABLE}
+          (s3_key,status, contributor, created_at, updated_at)
+          VALUES ($1, $2, $3, $4, current_timestamp, current_timestamp)
+          RETURNING s3_key;`;
+
+      // Setup values
+      values = [event.decodedSrcKey,false,cuuid];
+    }
 
 
     // Execute
