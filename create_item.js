@@ -43,27 +43,27 @@ module.exports.handler = async (event, context, callback) => {
     let type = null;
 
     switch (true) {
-      case (/image/i.match(event.s3metadata.ContentType)):
+      case (event.s3metadata.ContentType.match(/image/i)):
         type = 'Image';
         break;
-      case (/audio/i.match(event.s3metadata.ContentType)):
+      case (event.s3metadata.ContentType.match(/audio/i)):
         type = 'Audio';
         break;
-      case (/video/i.match(event.s3metadata.ContentType)):
+      case (event.s3metadata.ContentType.match(/video/i)):
         type = 'Video';
         break;
       case (downloadTextTypes.reduce(
         (overall, item) => {
-          return overall || (new RegExp(item), "i").match(event.s3metadata.ContentType)
+          return overall || event.s3metadata.ContentType.match((new RegExp(item), "i"));
         },
         false
       )):
         type = 'DownloadText'
         break;
-      case (/text/i.match(event.s3metadata.ContentType)):
+      case (event.s3metadata.ContentType.match(/text/i)):
         type = 'Text';
         break;
-      case(/pdf/i.match(event.s3metadata.ContentType)):
+      case(event.s3metadata.ContentType.match(/pdf/i)):
         type = 'PDF'
         break;
       default:
