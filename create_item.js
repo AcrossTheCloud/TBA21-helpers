@@ -83,7 +83,7 @@ module.exports.handler = async (event, context, callback) => {
     } else {
       query = `INSERT INTO ${process.env.PG_ITEMS_TABLE}
           (s3_key,status, contributor, created_at, updated_at)
-          VALUES ($1, $2, $3, $4, current_timestamp, current_timestamp)
+          VALUES ($1, $2, $3, current_timestamp, current_timestamp)
           RETURNING s3_key;`;
 
       // Setup values
