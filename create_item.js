@@ -44,28 +44,28 @@ module.exports.handler = async (event, context, callback) => {
     console.log(event.s3metadata.ContentType);
 
     switch (true) {
-      case (event.s3metadata.ContentType.match(/image/i)):
-        console.log(image);
+      case (/image/i.test(event.s3metadata.ContentType)):
         type = 'Image';
         break;
-      case (event.s3metadata.ContentType.match(/audio/i)):
+      case (/audio/i.test(event.s3metadata.ContentType)):
         type = 'Audio';
         break;
-      case (event.s3metadata.ContentType.match(/video/i)):
+      case (/video/i.test(event.s3metadata.ContentType)):
         type = 'Video';
         break;
       case (downloadTextTypes.reduce(
         (overall, item) => {
-          return overall || event.s3metadata.ContentType.match((new RegExp(item), "i"));
+          let re = new RegExp(item);
+          return overall || re.test(event.s3metadata.ContentType);
         },
         false
       )):
         type = 'DownloadText'
         break;
-      case (event.s3metadata.ContentType.match(/text/i)):
+      case (/text/i.test(event.s3metadata.ContentType)):
         type = 'Text';
         break;
-      case(event.s3metadata.ContentType.match(/pdf/i)):
+      case(/pdf/i.test(event.s3metadata.ContentType)):
         type = 'PDF'
         break;
       default:
