@@ -41,9 +41,11 @@ module.exports.handler = async (event, context, callback) => {
     }
 
     let type = null;
+    console.log(event.s3metadata.ContentType);
 
     switch (true) {
       case (event.s3metadata.ContentType.match(/image/i)):
+        console.log(image);
         type = 'Image';
         break;
       case (event.s3metadata.ContentType.match(/audio/i)):
