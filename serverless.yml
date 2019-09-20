@@ -159,11 +159,6 @@ stepFunctions:
                   - Variable: "$.isWav"
                     BooleanEquals: true
                     Next: WavConversion
-                  Default: RawConversion
-                RawConversion:
-                  Type: Task
-                  Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion
-                  End: true
                 WavConversion:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-wav_conversion
