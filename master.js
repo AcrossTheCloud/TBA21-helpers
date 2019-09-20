@@ -22,6 +22,10 @@ module.exports.start = async (event, context, callback) => {
     data.ContentType.match(/audio\/(wave|wav|x-wav|x-pn-wav)/i) ||
     decodedSrcKey.match(/\.wav$/i)
   );
+  let isRaw = Boolean(
+    data.ContentType.match(/image\/(x-sony-arw|x-canon-cr2|x-canon-crw|x-kodak-dcr|x-adobe-dng|x-epson-erf|x-kodak-k25|x-minolta-mrw|x-nikon-nef|x-olympus-orf|x-pentax-pef|x-fuji-raf|x-panasonic-raw|x-sony-sr|x-sigma-x3f|x-dcraw)/i) ||
+    decodedSrcKey.match(/\.raw$|\.dng$\.cr2$/i)
+  ); // https://stackoverflow.com/questions/43473056/which-mime-type-should-be-used-for-a-raw-image
 
   const params = {
     stateMachineArn: process.env.stateMachineArn,
