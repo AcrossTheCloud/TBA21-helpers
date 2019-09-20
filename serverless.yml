@@ -163,11 +163,11 @@ stepFunctions:
                     Next: WavConversion
                   - Variable: "$.isRaw"
                     BooleanEquals: true
-                    ResultPath: '$.raw_conversion_results'
                     Next: RawConversion
                 RawConversion:
                   Type: Task
                   Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-raw_conversion
+                  ResultPath: '$.raw_conversion_results'
                   End: true
                 WavConversion:
                   Type: Task
