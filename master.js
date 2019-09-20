@@ -29,7 +29,7 @@ module.exports.start = async (event, context, callback) => {
 
   const params = {
     stateMachineArn: process.env.stateMachineArn,
-    input: JSON.stringify({srcBucket: srcBucket, srcKey: srcKey, decodedSrcKey: decodedSrcKey, s3metadata: data, isHEI,isImage,isJPEGPNG, isVideo, isWav}),
+    input: JSON.stringify({srcBucket: srcBucket, srcKey: srcKey, decodedSrcKey: decodedSrcKey, s3metadata: data, isHEI,isImage,isJPEGPNG, isVideo, isWav, isRaw}),
     name: crypto.createHmac('sha256', srcKey + uuid()).digest('hex')
   }
 
