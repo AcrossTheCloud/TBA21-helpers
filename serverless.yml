@@ -240,6 +240,13 @@ stepFunctions:
                               Resource: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:${self:service}-${opt:stage}-image_hashing
                               ResultPath: '$.imghashing_result'
                               End: true
+                              Catch:
+                              - ErrorEquals: ["States.ALL"]
+                                Next: OutOfMemoryFallback
+                            OutOfMemoryFallback:
+                              Type: Pass
+                              Result: "Out of memory for image hashing."
+                              End: true
           Final State:
             Type: Pass
             End: true
