@@ -38,17 +38,21 @@ module.exports.handler = async(event,context,callback) => {
 
 
     let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
-    console.log(filename);
 
-    let outputFile = await raw_conversion(filename);
-    console.log(outputFile);
-    let uploadKey = event.decodedSrcKey.substring(0, event.decodedSrcKey.lastIndexOf('.')) + '.jpg';
+    let doesntNeedIt = !Boolean(filename.match(/(\.png|\.jpg|\.jpeg)$/)); // fixme
 
-    if (outputFile) {
-      let put = await upload(outputFile, uploadKey, event.srcBucket);
-      return put;
-    } else {
-      return '';
+    if (!doesntNeedIt) {
+
+      let outputFile = await raw_conversion(filename);
+      console.log(outputFile);
+      let uploadKey = event.decodedSrcKey.substring(0, event.decodedSrcKey.lastIndexOf('.')) + '.jpg';
+
+      if (outputFile) {
+        let put = await upload(outputFile, uploadKey, process.env.CONVERTED_IMAGE_BUCKET);
+        return put;
+      } else {
+        return '';
+      }
     }
 
   } catch (err) {
