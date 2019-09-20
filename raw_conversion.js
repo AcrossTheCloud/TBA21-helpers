@@ -43,14 +43,14 @@ module.exports.handler = async (event, context, callback) => {
       console.log('trace'+outputFile)
       let put = await upload(outputFile, uploadKey, process.env.CONVERTED_IMAGE_BUCKET);
       console.log(put.toString());
-      callback(null);
+      return put;
     } else {
-      callback(null);
+      return '';
     }
 
   } catch (err) {
     console.log(err);
-    callback(null);
+    return '';
   }
 
 }
