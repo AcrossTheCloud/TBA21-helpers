@@ -107,6 +107,8 @@ functions:
       DEBUG: exiftool-json-db
   raw_conversion:
     handler: raw_conversion.handler
+    environment:
+      CONVERTED_IMAGE_BUCKET: converted-images.ocean-archive.org
   wav_conversion:
     handler: generate_m4a.handler
     environment:
