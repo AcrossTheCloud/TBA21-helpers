@@ -1,16 +1,14 @@
-process.env.PATH += ":"+process.env.LAMBDA_TASK_ROOT+"/bin"
-process.env.LD_LIBRARY_PATH += ":"+process.env.LAMBDA_TASK_ROOT+"/lib"
+process.env.PATH += ":" + process.env.LAMBDA_TASK_ROOT + "/bin"
+process.env.LD_LIBRARY_PATH += ":" + process.env.LAMBDA_TASK_ROOT + "/lib"
 
-const util = require('util');
 const spawn = require('child_process').spawn;
 const fs = require('fs');
 const download = require('./common').download;
 const upload = require('./common').upload;
-const execFile = util.promisify(require('child_process').execFile);
 
 const raw_conversion = async (file) => {
-  const outputFile = file.substring(0,file.lastIndexOf('.'))+'.jpg';
-  
+  const outputFile = file.substring(0, file.lastIndexOf('.')) + '.jpg';
+
   let end = new Promise(function (resolve, reject) {
     spawn('bin/dcraw', ['-c', '-q', '3', '-w', '-H', '5', file,]).stdout.pipe(
       spawn('bin/cjpeg').stdout.pipe(
@@ -22,23 +20,20 @@ const raw_conversion = async (file) => {
   return outputFile;
 }
 
-module.exports.handler = async(event,context,callback) => {
+module.exports.handler = async (event, context, callback) => {
 
   console.log('doing raw_conversion');
   console.log(event);
 
   try {
 
-    if (event.s3metadata.ContentLength > 500000000) 
-    {
-     console.log(`ERROR: the file size for ${event.decodedSrcKey} is over 500mb, this operation might fail.`);
-     callback(null);
-     return;
+    if (event.s3metadata.ContentLength > 500000000) {
+      console.log(`ERROR: the file size for ${event.decodedSrcKey} is over 500mb, this operation might fail.`);
+      callback(null, { success: false });
+      return;
     }
 
-
     let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
-
 
     let outputFile = await raw_conversion(filename);
     console.log(outputFile);
@@ -46,14 +41,14 @@ module.exports.handler = async(event,context,callback) => {
 
     if (outputFile) {
       let put = await upload(outputFile, uploadKey, process.env.CONVERTED_IMAGE_BUCKET);
-      return put;
+      callback(null, put);
     } else {
-      return '';
+      callback(null, { success: false });
     }
 
   } catch (err) {
     console.log(err);
-    callback(null); //ok to fail as it's a final state
+    callback(null, { success: false });
   }
 
 }
