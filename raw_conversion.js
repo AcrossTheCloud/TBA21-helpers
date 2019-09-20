@@ -34,36 +34,23 @@ module.exports.handler = async(event,context,callback) => {
      console.log(`ERROR: the file size for ${event.decodedSrcKey} is over 500mb, this operation might fail.`);
      callback(null);
      return;
-     }
+    }
 
 
     let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
     console.log(filename);
 
-    const { error, stdout, stderr } = await execFile('file', [filename]);
-    if (error) {
-      console.log(error.code);
-      console.log(stderr);
-      console.log(stdout);
-      throw new Error(error);
+    let outputFile = await raw_conversion(filename);
+    console.log(outputFile);
+    let uploadKey = event.decodedSrcKey.substring(0, event.decodedSrcKey.lastIndexOf('.')) + '.jpg';
+
+    if (outputFile) {
+      let put = await upload(outputFile, uploadKey, event.srcBucket);
+      return put;
+    } else {
+      return '';
     }
 
-    if (stdout.toLowerCase().match(/raw image/)) {
-      console.log('raw image detected');
-
-
-      let outputFile = await raw_conversion(filename);
-      console.log(outputFile);
-      let uploadKey = event.decodedSrcKey.substring(0, event.decodedSrcKey.lastIndexOf('.')) + '.jpg';
-
-      if (outputFile) {
-        let put = await upload(outputFile, uploadKey, event.srcBucket);
-        return put;
-      } else {
-        return '';
-      }
-
-    }
   } catch (err) {
     console.log(err);
     callback(null); //ok to fail as it's a final state
