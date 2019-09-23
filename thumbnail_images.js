@@ -28,8 +28,8 @@ module.exports.handler = async (event, context) => {
 
 
     let s3ObjectParams = {
-      Bucket: event.srcBucket,
-      Key: event.decodedSrcKey
+      Bucket: (event.isHEI ? event.convertHEIresult.convertedBucket : event.srcBucket),
+      Key: (event.isHEI ? event.convertHEIresult.convertedKey : event.decodedSrcKey)
     }
 
     const getImageMetaData = new Promise((resolve, reject) => {
