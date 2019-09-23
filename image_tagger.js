@@ -12,7 +12,7 @@ console.log(cn);
 const db = pgp(cn);
 
 
-exports.handler = async (event,context,callback) => {
+exports.handler = async (event,context) => {
 
   console.log('doing image_tagger:');
   console.log(event);
@@ -56,11 +56,11 @@ exports.handler = async (event,context,callback) => {
 
 
         console.log(data);
-        callback(null, {'success':true});
+        return ( {'success':true});
 
       }
   } catch (err) {
     console.log(err);
-    callback(null, {'success':false}); //ok to pass as the next step is independent
+    return ({'success':false}); //ok to pass as the next step is independent
   }
 }

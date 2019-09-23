@@ -5,7 +5,7 @@ const s3 = new AWS.S3();
 
 const stepfunctions = new AWS.StepFunctions();
 
-module.exports.start = async (event, context, callback) => {
+module.exports.start = async (event, context) => {
   const s3Record = event.Records[0].s3;
   const srcBucket = s3Record.bucket.name;
   const srcKey = s3Record.object.key; 
@@ -33,9 +33,9 @@ module.exports.start = async (event, context, callback) => {
     name: crypto.createHmac('sha256', srcKey + uuid()).digest('hex')
   }
 
-  return stepfunctions.startExecution(params).promise().then(() => {
-    callback(null, `Your statemachine ${process.env.stateMachineArn} executed successfully for job ${params.name}`);
+  stepfunctions.startExecution(params).promise().then(() => {
+    return (`Your statemachine ${process.env.stateMachineArn} executed successfully for job ${params.name}`);
   }).catch(error => {
-    callback(error.message);
+    throw new Error(error.message);
   });
 };

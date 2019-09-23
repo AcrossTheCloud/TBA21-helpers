@@ -12,7 +12,7 @@ const db = pgp(cn);
 
 
 
-module.exports.handler = async (event, context, callback) => {
+module.exports.handler = async (event, context) => {
 
   console.log('doing hashes...');
   console.log(event);
@@ -61,14 +61,15 @@ module.exports.handler = async (event, context, callback) => {
     //console.log(query, values);
     let data = await db.one(query, values);
     console.log(data);
-    callback(null, { success: true });
+    return ({ success: true });
 
 
 
   }
   catch (err) {
-      callback(null, { success: false }); //succeed anyway so that other step functions proceed
       console.log(err);
+      return ({ success: false }); //succeed anyway so that other step functions proceed
+
   }
 
 }

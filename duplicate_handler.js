@@ -11,7 +11,7 @@ const db = pgp(cn);
 
 
 
-module.exports.handler = async (event, context, callback) => {
+module.exports.handler = async (event, context) => {
 
   console.log('doing duplicate handling...');
   console.log(event);
@@ -36,7 +36,7 @@ module.exports.handler = async (event, context, callback) => {
 
     if (oldKey === event.decodedSrcKey) {
       //same object reuploaded , do nothing
-      callback(null, { success: true });
+      return ({ success: true });
     } else {
       let params = {
         Bucket: event.srcBucket,
@@ -72,13 +72,12 @@ module.exports.handler = async (event, context, callback) => {
           values = [event.hashResult.sha512Hash, [event.decodedSrcKey]];
 
         } else {
-          callback(headErr);
-          return;
+          throw new Error(headErr.message);
         }
       }
       data = await db.one(query, values);
       console.log(data);
-      callback(null, { success: true });
+      return ({ success: true });
 
 
 
@@ -89,8 +88,8 @@ module.exports.handler = async (event, context, callback) => {
 
   }
   catch (err) {
-    callback(err);
     console.log(err);
+    throw new Error(err.message);
   }
 
 }
