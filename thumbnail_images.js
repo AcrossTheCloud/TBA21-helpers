@@ -12,17 +12,14 @@ const db = pgp(cn);
 const s3WriteableStream = (destBucket, destKey) => {
   let pass = new stream.PassThrough();
 
-  let params = {Bucket: destBucket, Key: destKey, Body: pass};
-  s3.upload(params, function(err, data) {
-    console.log('in upload callback');
-    console.log(err, data);
-  });
+  let params = { Bucket: destBucket, Key: destKey, Body: pass };
+  let prom = s3.upload(params).promise();
 
-  return pass;
+  return { writeStream: pass, promise: prom };
 }
 
 
-module.exports.handler = async(event,context,callback) => {
+module.exports.handler = async (event, context) => {
 
   console.log('doing image thumbnailing');
   console.log(event);
@@ -31,8 +28,8 @@ module.exports.handler = async(event,context,callback) => {
 
 
     let s3ObjectParams = {
-      Bucket: event.srcBucket,
-      Key: event.decodedSrcKey
+      Bucket: (event.isHEI ? event.convertHEIresult.convertedBucket : event.srcBucket),
+      Key: (event.isHEI ? event.convertHEIresult.convertedKey : event.decodedSrcKey)
     }
 
     const getImageMetaData = new Promise((resolve, reject) => {
@@ -64,24 +61,31 @@ module.exports.handler = async(event,context,callback) => {
       });
 
       let transformer = sharp()
+        .limitInputPixels(false)
         .resize(targetWidth)
         .png()
         .on('info', function (info) {
           //console.log('Image height is ' + info.height);
         });
 
-      const newKey = s3ObjectParams.Key + '.thumbnail'+targetWidth+'.png';
+      const newKey = s3ObjectParams.Key + '.thumbnail' + targetWidth + '.png';
 
-      let writeStream = s3WriteableStream(process.env.THUMBNAIL_BUCKET, newKey)
+      let { writeStream, promise } = s3WriteableStream(process.env.THUMBNAIL_BUCKET, newKey)
 
       readableStream.pipe(transformer).on('error', (err) => {
         reject(err);
       }).pipe(writeStream).on('error', (err) => {
         reject(err);
       }).on('finish', () => {
-        resolve(newKey);
+        console.log('Streams finished.');
       });
 
+      promise.then((data) => {
+        console.log(data);
+        resolve(data);
+      }).catch((err) => {
+        reject(err);
+      })
 
 
     }));
@@ -95,7 +99,7 @@ module.exports.handler = async(event,context,callback) => {
     file_dimensions =  $2
     where s3_key=$1
     RETURNING s3_key,file_dimensions;`;
-    
+
     // Setup values
     const values = [event.createResult.db_s3_key, [imageMetaData.width, imageMetaData.height]];
 
@@ -105,32 +109,28 @@ module.exports.handler = async(event,context,callback) => {
     console.log(data);
 
     let resolvedData = [];
-    
+
     switch (true) {
       case (imageMetaData.width > 1140):
         resolvedData.push(await readTransofrmWrite(1140));
-        console.log(resolvedData);
       case (imageMetaData.width > 960):
         resolvedData.push(await readTransofrmWrite(960));
-        console.log(resolvedData);
       case (imageMetaData.width > 720):
         resolvedData.push(await readTransofrmWrite(720));
-        console.log(resolvedData);
       case (imageMetaData.width > 540):
         resolvedData.push(await readTransofrmWrite(540));
-        console.log(resolvedData);
 
     }
 
 
 
-    callback(null,{ key: resolvedData });
+    return ({ uploadedObjects: resolvedData });
 
 
-    
+
   } catch (err) {
     console.log(err);
-    callback(err); // does need to fail as subsequent steps depend on it 
+    throw new Error(err.message); // does need to fail as subsequent steps depend on it 
   }
 
 }
