@@ -22,7 +22,7 @@ const downloadTextTypes = [
   'vnd.amazon',
 ];
 
-module.exports.handler = async (event, context, callback) => {
+module.exports.handler = async (event, context) => {
 
   console.log('Creating item...');
   console.log(event);
@@ -97,17 +97,18 @@ module.exports.handler = async (event, context, callback) => {
     //console.log(query, values);
     let data = await db.one(query, values);
     console.log(data);
-    callback(null,  {'db_s3_key':data.s3_key , 'isDuplicate':false });
+    return ({'db_s3_key':data.s3_key , 'isDuplicate':false });
 
 
 
   }
   catch (err) {
-    if (err.detail && err.detail.indexOf("already exists")>=0)
-     callback(null, {'db_s3_key':event.decodedSrcKey , 'isDuplicate':true  });//succeed to proceed to parallel states
-    else 
-      callback(err); // does need to fail in this case as subsequent steps depend on it
     console.log(err);
+    if (err.detail && err.detail.indexOf("already exists")>=0)
+     return ({'db_s3_key':event.decodedSrcKey , 'isDuplicate':true  });//succeed to proceed to parallel states
+    else 
+      throw new Error(err.message); // does need to fail in this case as subsequent steps depend on it
+
   }
 
 }
