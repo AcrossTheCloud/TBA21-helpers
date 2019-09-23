@@ -13,11 +13,9 @@ const s3WriteableStream = (destBucket, destKey) => {
   let pass = new stream.PassThrough();
 
   let params = { Bucket: destBucket, Key: destKey, Body: pass };
-  s3.upload(params, function (err, data) {
-    console.log(err, data);
-  });
+  let prom = s3.upload(params).promise();
 
-  return pass;
+  return { writeStream: pass, promise: prom };
 }
 
 
@@ -72,16 +70,22 @@ module.exports.handler = async (event, context) => {
 
       const newKey = s3ObjectParams.Key + '.thumbnail' + targetWidth + '.png';
 
-      let writeStream = s3WriteableStream(process.env.THUMBNAIL_BUCKET, newKey)
+      let { writeStream, promise } = s3WriteableStream(process.env.THUMBNAIL_BUCKET, newKey)
 
       readableStream.pipe(transformer).on('error', (err) => {
         reject(err);
       }).pipe(writeStream).on('error', (err) => {
         reject(err);
       }).on('finish', () => {
-        resolve(newKey);
+        console.log('Streams finished.');
       });
 
+      promise.then((data) => {
+        console.log(data);
+        resolve(data);
+      }).catch((err) => {
+        reject(err);
+      })
 
 
     }));
@@ -109,22 +113,18 @@ module.exports.handler = async (event, context) => {
     switch (true) {
       case (imageMetaData.width > 1140):
         resolvedData.push(await readTransofrmWrite(1140));
-        console.log(resolvedData);
       case (imageMetaData.width > 960):
         resolvedData.push(await readTransofrmWrite(960));
-        console.log(resolvedData);
       case (imageMetaData.width > 720):
         resolvedData.push(await readTransofrmWrite(720));
-        console.log(resolvedData);
       case (imageMetaData.width > 540):
         resolvedData.push(await readTransofrmWrite(540));
-        console.log(resolvedData);
 
     }
 
 
 
-    return ({ key: resolvedData });
+    return ({ uploadedObjects: resolvedData });
 
 
 
