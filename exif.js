@@ -11,7 +11,7 @@ const cn = `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process
 // Setup the connection
 const db = pgp(cn);
 
-module.exports.handler = async (event,context,callback) => {
+module.exports.handler = async (event,context) => {
   
   console.log('doing exif...');
   console.log(event);

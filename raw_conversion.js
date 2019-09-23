@@ -20,7 +20,7 @@ const raw_conversion = async (file) => {
   return outputFile;
 }
 
-module.exports.handler = async (event, context, callback) => {
+module.exports.handler = async (event, context) => {
 
   console.log('doing raw_conversion');
   console.log(event);
@@ -29,8 +29,7 @@ module.exports.handler = async (event, context, callback) => {
 
     if (event.s3metadata.ContentLength > 500000000) {
       console.log(`ERROR: the file size for ${event.decodedSrcKey} is over 500mb, this operation might fail.`);
-      callback(null, { success: false });
-      return;
+      return ({ success: false });
     }
 
     let filename = await download(event.srcBucket, event.srcKey, event.decodedSrcKey);
