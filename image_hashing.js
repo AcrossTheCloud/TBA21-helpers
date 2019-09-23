@@ -11,7 +11,7 @@ const cn = `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process
 const db = pgp(cn);
 
 
-exports.handler = async (event,context,callback) => {
+exports.handler = async (event,context) => {
 
   console.log('doing image_hashing:');
   console.log(event);

@@ -14,7 +14,6 @@ const s3WriteableStream = (destBucket, destKey) => {
 
   let params = {Bucket: destBucket, Key: destKey, Body: pass};
   s3.upload(params, function(err, data) {
-    console.log('in upload callback');
     console.log(err, data);
   });
 
@@ -22,7 +21,7 @@ const s3WriteableStream = (destBucket, destKey) => {
 }
 
 
-module.exports.handler = async(event,context,callback) => {
+module.exports.handler = async(event,context) => {
 
   console.log('doing image thumbnailing');
   console.log(event);
@@ -124,13 +123,13 @@ module.exports.handler = async(event,context,callback) => {
 
 
 
-    callback(null,{ key: resolvedData });
+    return ({ key: resolvedData });
 
 
     
   } catch (err) {
     console.log(err);
-    callback(err); // does need to fail as subsequent steps depend on it 
+    throw new Error(err.message); // does need to fail as subsequent steps depend on it 
   }
 
 }
