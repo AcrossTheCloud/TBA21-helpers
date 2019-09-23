@@ -12,8 +12,8 @@ const db = pgp(cn);
 const s3WriteableStream = (destBucket, destKey) => {
   let pass = new stream.PassThrough();
 
-  let params = {Bucket: destBucket, Key: destKey, Body: pass};
-  s3.upload(params, function(err, data) {
+  let params = { Bucket: destBucket, Key: destKey, Body: pass };
+  s3.upload(params, function (err, data) {
     console.log(err, data);
   });
 
@@ -21,7 +21,7 @@ const s3WriteableStream = (destBucket, destKey) => {
 }
 
 
-module.exports.handler = async(event,context) => {
+module.exports.handler = async (event, context) => {
 
   console.log('doing image thumbnailing');
   console.log(event);
@@ -63,13 +63,14 @@ module.exports.handler = async(event,context) => {
       });
 
       let transformer = sharp()
+        .limitInputPixels(false)
         .resize(targetWidth)
         .png()
         .on('info', function (info) {
           //console.log('Image height is ' + info.height);
         });
 
-      const newKey = s3ObjectParams.Key + '.thumbnail'+targetWidth+'.png';
+      const newKey = s3ObjectParams.Key + '.thumbnail' + targetWidth + '.png';
 
       let writeStream = s3WriteableStream(process.env.THUMBNAIL_BUCKET, newKey)
 
@@ -94,7 +95,7 @@ module.exports.handler = async(event,context) => {
     file_dimensions =  $2
     where s3_key=$1
     RETURNING s3_key,file_dimensions;`;
-    
+
     // Setup values
     const values = [event.createResult.db_s3_key, [imageMetaData.width, imageMetaData.height]];
 
@@ -104,7 +105,7 @@ module.exports.handler = async(event,context) => {
     console.log(data);
 
     let resolvedData = [];
-    
+
     switch (true) {
       case (imageMetaData.width > 1140):
         resolvedData.push(await readTransofrmWrite(1140));
@@ -126,7 +127,7 @@ module.exports.handler = async(event,context) => {
     return ({ key: resolvedData });
 
 
-    
+
   } catch (err) {
     console.log(err);
     throw new Error(err.message); // does need to fail as subsequent steps depend on it 
