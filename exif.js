@@ -66,11 +66,11 @@ module.exports.handler = async (event,context,callback) => {
     let data = await db.one(query, values);
     
     console.log(data);
-    callback(null, { success: true, "result":exif });
+    return ({ success: true, "result":exif });
     //return data; //no need for return here ? 
   }
   catch (err) {
     console.log(err);
-    callback(null, { success: false }); // ok to pass with success:false 
+    return ({ success: false }); // ok to pass with success:false 
   }
 }

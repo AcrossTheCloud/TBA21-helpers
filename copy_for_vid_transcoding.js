@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 const COPY_SIZE_LIMIT = (5 * 1024 * 1024 * 1024); //5GB
 
-module.exports.handler = async (event, context, callback) => {
+module.exports.handler = async (event, context) => {
 
   const objectSize = Number(event.s3metadata.ContentLength);
 
@@ -79,7 +79,7 @@ module.exports.handler = async (event, context, callback) => {
 
     }
 
-    callback(null, { success: true, result: completeData }); //succeed anyway so that other step functions proceed
+    return ({ success: true, result: completeData }); //succeed anyway so that other step functions proceed
   } catch (err) {
     console.log(err);
 
@@ -93,7 +93,7 @@ module.exports.handler = async (event, context, callback) => {
       console.log(abortData);
     }
 
-    callback(err);
+    throw new Error(err.message);
 
   }
 

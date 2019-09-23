@@ -46,11 +46,11 @@ exports.handler = async (event,context,callback) => {
 
 
       console.log(data);
-      callback(null, data);
+      return data;
 
 
   } catch (err) {
     console.log(err);
-    callback(null, { success: false });
+    return ( { success: false });
   }
 }
