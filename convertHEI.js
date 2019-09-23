@@ -7,7 +7,7 @@ const upload = require('./common').upload;
 const execFile = util.promisify(require('child_process').execFile);
 
 
-module.exports.handler = async(event,context,callback) => {
+module.exports.handler = async(event,context) => {
 
   console.log('doing convertHEI');
   console.log(event);
@@ -37,13 +37,13 @@ module.exports.handler = async(event,context,callback) => {
       let uploadKey = event.srcKey.substring(0, event.srcKey.lastIndexOf('.')) + '.jpg';
       let put = await upload(outputFile, uploadKey, process.env.CONVERSION_BUCKET);
       console.log(put);
-      callback(null,{convertedBucket: process.env.CONVERSION_BUCKET, convertedKey:uploadKey });
+      return ({convertedBucket: process.env.CONVERSION_BUCKET, convertedKey:uploadKey });
 
 
     
   } catch (err) {
     console.log(err);
-    callback(err); // does need to fail as subsequent steps depend on it 
+    throw new Error(err.message); // does need to fail as subsequent steps depend on it 
   }
 
 }

@@ -40,17 +40,17 @@ module.exports.handler = async (event, context, callback) => {
     let uploadKey = event.decodedSrcKey.substring(0, event.decodedSrcKey.lastIndexOf('.')) + '.jpg';
 
     if (outputFile) {
-      console.log('trace'+outputFile)
+      console.log('trace' + outputFile)
       let put = await upload(outputFile, uploadKey, process.env.CONVERTED_IMAGE_BUCKET);
       console.log(put.toString());
       return put;
     } else {
-      return '';
+      return ({ success: false });
     }
 
   } catch (err) {
     console.log(err);
-    return '';
+    return ({ success: false });
   }
 
 }
