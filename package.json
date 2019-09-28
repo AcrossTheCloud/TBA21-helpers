@@ -1,6 +1,6 @@
 {
   "name": "tba21helpers",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "license": "GPL-3.0",
   "description": "TBA21 helper functions",
   "main": "bot.js",
@@ -12,7 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/AcrossTheCloud/TBA21-helpers.git"
   },
-  "author": "Matthew Berryman",
+  "author": "Across the Cloud Pty Ltd",
   "bugs": {
     "url": "https://github.com/AcrossTheCloud/TBA21-helpers/issues"
   },
