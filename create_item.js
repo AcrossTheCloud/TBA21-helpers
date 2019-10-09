@@ -111,7 +111,7 @@ module.exports.handler = async (event, context) => {
     let qldbres = await(request(options));
     console.log(qldbres);
 
-    return ({'db_s3_key':data.s3_key , 'isDuplicate':false });
+    return ({'db_s3_key':pgdata.s3_key , 'isDuplicate':false });
 
   }
   catch (err) {
