@@ -90,6 +90,9 @@ functions:
       TRANSCODE_BUCKET: oceanarchive-vod-source-1ma7gv7bdyc23
   create_item:
     handler: create_item.handler
+    environment:
+      QLDB_API_KEY: ${env:QLDB_API_KEY}
+      QLDB_API_URL: ${env:QLDB_API_URL}
   hashes:
     handler: hashes.handler
     memorySize: 512
