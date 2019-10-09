@@ -1,9 +1,9 @@
-const AWS = require('aws-sdk');
-
 const pgp = require('pg-promise')();
 
 const cn = `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process.env.PGHOST}:${process.env.PGPORT}/${process.env.PGDATABASE}?ssl=${process.env.PGSSL}`;
 //console.log(cn);
+
+const request = require('request-promise');
 
 // Setup the connection
 const db = pgp(cn);
@@ -78,7 +78,7 @@ module.exports.handler = async (event, context) => {
       query = `INSERT INTO ${process.env.PG_ITEMS_TABLE}
           (s3_key,status, contributor, item_type, created_at, updated_at)
           VALUES ($1, $2, $3, $4, current_timestamp, current_timestamp)
-          RETURNING s3_key;`;
+          RETURNING id, s3_key;`;
 
       // Setup values
       values = [event.decodedSrcKey,false,cuuid,type];
@@ -86,7 +86,7 @@ module.exports.handler = async (event, context) => {
       query = `INSERT INTO ${process.env.PG_ITEMS_TABLE}
           (s3_key,status, contributor, created_at, updated_at)
           VALUES ($1, $2, $3, current_timestamp, current_timestamp)
-          RETURNING s3_key;`;
+          RETURNING id, s3_key;`;
 
       // Setup values
       values = [event.decodedSrcKey,false,cuuid];
@@ -95,11 +95,23 @@ module.exports.handler = async (event, context) => {
 
     // Execute
     //console.log(query, values);
-    let data = await db.one(query, values);
-    console.log(data);
+    let pgdata = await db.one(query, values);
+    console.log(pgdata);
+
+    const options = {
+      method: `POST`,
+      json: false,
+      headers: {
+        'X-API-KEY': process.env.QLDB_API_KEY
+      },
+      uri: process.env.QLDB_API_URL,
+      body: 'INSERT INTO items_history {"id": '+pgdata.id+'};'
+    };
+
+    let qldbres = await(request(options));
+    console.log(qldbres);
+
     return ({'db_s3_key':data.s3_key , 'isDuplicate':false });
-
-
 
   }
   catch (err) {
