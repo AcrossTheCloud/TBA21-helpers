@@ -105,7 +105,7 @@ module.exports.handler = async (event, context) => {
         'X-API-KEY': process.env.QLDB_API_KEY
       },
       uri: process.env.QLDB_API_URL,
-      body: 'INSERT INTO items_history {"id": '+pgdata.id+'};'
+      body: `INSERT INTO items_history VALUE {'id': ${pgdata.id}};`
     };
 
     let qldbres = await(request(options));
