@@ -99,7 +99,6 @@ functions:
   duplicate_handler:
     handler: duplicate_handler.handler
   exif:
-    runtime: nodejs8.10
     handler: exif.handler
     package:
       individually: true
