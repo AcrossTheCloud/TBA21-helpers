@@ -4,6 +4,8 @@ phases:
   install:
     commands:
       - npm install
+      - rm -rf node_modules/sharp
+      - npm install --arch=x64 --platform=linux --target=10.15.0 sharp
   build:
     commands:
       - rm -rf test_files
