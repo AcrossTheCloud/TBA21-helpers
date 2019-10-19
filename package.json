@@ -18,11 +18,11 @@
   },
   "homepage": "https://github.com/AcrossTheCloud/TBA21-helpers",
   "dependencies": {
-    "exiftool.js": "^0.3.0",
+    "exiftool.js": "mattburns/exiftool.js",
     "image-hash": "AcrossTheCloud/image-hash",
     "pg-promise": "^9.1.4",
     "request-promise": "^4.2.4",
-    "sharp": "^0.23.0",
+    "sharp": "^0.23.1",
     "uuid": "^3.3.3"
   },
   "devDependencies": {
