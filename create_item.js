@@ -108,8 +108,10 @@ module.exports.handler = async (event, context) => {
       body: `INSERT INTO item_history VALUE {'id': ${pgdata.id}};`
     };
 
-    let qldbres = await(request(options));
-    console.log(qldbres);
+    if (process.env.QLDB_API_URL) {
+      let qldbres = await(request(options));
+      console.log(qldbres);
+    }
 
     return ({'db_s3_key':pgdata.s3_key , 'isDuplicate':false });
 
