@@ -53,7 +53,7 @@ module.exports.handler = async (event,context) => {
       query = `UPDATE ${process.env.PG_ITEMS_TABLE}
       set updated_at = current_timestamp,
       exif =  $2,
-      location = ST_SetSRID(ST_Point($3,$4),4326)
+      geom = ST_SetSRID(ST_Collect(ST_MakePoint($3,$4,0)),4326)
       where s3_key=$1
       RETURNING s3_key, location;`;
       values.push(exifLongitude,exifLatitude);
