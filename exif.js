@@ -11,6 +11,14 @@ const cn = `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@${process
 // Setup the connection
 const db = pgp(cn);
 
+const convertDegreeToDecimal = (degreeString, degreeRef) => {
+  let components = degreeString.split(',');
+  let decimalVal = Number(components[0]) + (Number(components[1]) / 60) + (Number(components[2]) / 60 / 60);
+  if (degreeRef.toUpperCase().trim().match(/^(S|W)$/))
+    decimalVal = -decimalVal;
+  return decimalVal;
+}
+
 module.exports.handler = async (event,context) => {
   
   console.log('doing exif...');
@@ -30,6 +38,8 @@ module.exports.handler = async (event,context) => {
     
     const getExif = util.promisify(exiftool.getExifFromLocalFileUsingNodeFs);
     const exif = await getExif(fs, filename);
+    console.log(exif);
+
     // Setup query
     let query = `UPDATE ${process.env.PG_ITEMS_TABLE}
     set updated_at = current_timestamp,
@@ -40,10 +50,11 @@ module.exports.handler = async (event,context) => {
     // Setup values
     let values = [event.createResult.db_s3_key, exif ];
     
-    let exifLongitude,exifLatitude;
+    let exifLongitude,exifLatitude,exifAltitude;
     try{
-      exifLongitude=Number(exif.GPSLongitude);
-      exifLatitude=Number(exif.GPSLatitude);
+      exifLongitude=exif.GPSLongitude.indexOf(',') >= 0 ? convertDegreeToDecimal(exif.GPSLongitude,exif.GPSLongitudeRef)  : Number(exif.GPSLongitude);
+      exifLatitude=exif.GPSLatitude.indexOf(',') >= 0 ? convertDegreeToDecimal(exif.GPSLatitude,exif.GPSLatitudeRef)  : Number(exif.GPSLatitude); 
+      exifAltitude = Number(exif.GPSAltitude) || 0;
     } catch(err){
       console.log('Error in extracting geolocation from exif...')
       console.log(err);
@@ -53,10 +64,10 @@ module.exports.handler = async (event,context) => {
       query = `UPDATE ${process.env.PG_ITEMS_TABLE}
       set updated_at = current_timestamp,
       exif =  $2,
-      geom = ST_SetSRID(ST_Collect(ST_MakePoint($3,$4,0)),4326)
+      geom = ST_SetSRID(ST_ForceCollection(ST_MakePoint($3,$4,$5)),4326)
       where s3_key=$1
-      RETURNING s3_key, location;`;
-      values.push(exifLongitude,exifLatitude);
+      RETURNING s3_key, ST_AsText(geom);`;
+      values.push(exifLongitude,exifLatitude,exifAltitude);
     }
     
     
