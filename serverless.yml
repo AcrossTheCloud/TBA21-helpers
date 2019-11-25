@@ -41,7 +41,7 @@ provider:
       Action:
         - "states:StartExecution"
       Resource:
-        - Ref: TBA21FileProcessorStateMachine${env:STAGE, prod}
+        - Ref: TBA21FileProcessorStateMachine${env:STAGE, 'prod'}
     - Effect: "Allow"
       Action:
         - "s3:*"
@@ -120,7 +120,7 @@ functions:
   convertHEI:
     handler: convertHEI.handler
     environment:
-      CONVERSION_BUCKET: tba21-helpers-heictojpeg-${env:STAGE, prod}
+      CONVERSION_BUCKET: tba21-helpers-heictojpeg-${env:STAGE, 'prod'}
   thumbnail_images:
     handler: thumbnail_images.handler
     memorySize: 1024
@@ -131,7 +131,7 @@ functions:
 stepFunctions:
   stateMachines:
     hellostepfunc:
-      name: TBA21FileProcessorStateMachine${env:STAGE, prod}
+      name: TBA21FileProcessorStateMachine${env:STAGE, 'prod'}
       definition:
         StartAt: CreateItem
         States:
@@ -270,13 +270,13 @@ resources:
     S3BucketTempJPEG:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: tba21-helpers-heictojpeg-${env:STAGE, prod}
+        BucketName: tba21-helpers-heictojpeg-${env:STAGE, 'prod'}
         # add additional custom bucket configuration here
   Outputs:
     TBA21FileProcessorStateMachine:
       Description: The ARN of the example state machine
       Value:
-        Ref: TBA21FileProcessorStateMachine${env:STAGE, prod}
+        Ref: TBA21FileProcessorStateMachine${env:STAGE, 'prod'}
 custom:
   stepFunctionsOffline:
     Hashes: hashes #(v2.0)
