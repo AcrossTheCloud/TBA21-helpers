@@ -54,7 +54,7 @@ module.exports.handler = async (event,context) => {
     try{
       exifLongitude=exif.GPSLongitude.indexOf(',') >= 0 ? convertDegreeToDecimal(exif.GPSLongitude,exif.GPSLongitudeRef)  : Number(exif.GPSLongitude);
       exifLatitude=exif.GPSLatitude.indexOf(',') >= 0 ? convertDegreeToDecimal(exif.GPSLatitude,exif.GPSLatitudeRef)  : Number(exif.GPSLatitude); 
-      exifAltitude = Number(exif.GPSAltitude) || 0;
+      exifAltitude = Number(exif.GPSAltitude)/1852 || 0;
     } catch(err){
       console.log('Error in extracting geolocation from exif...')
       console.log(err);
