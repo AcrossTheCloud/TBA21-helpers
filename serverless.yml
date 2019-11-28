@@ -22,7 +22,7 @@ package:
 
 provider:
   name: aws
-  runtime: nodejs10.x
+  runtime: nodejs12.x
   region: ${env:REGION, 'eu-central-1'}
   stage: ${env:STAGE, 'prod'}
   timeout: 900

@@ -5,7 +5,7 @@ phases:
     commands:
       - npm install
       - rm -rf node_modules/sharp
-      - npm install --arch=x64 --platform=linux --target=10.15.0 sharp
+      - npm install --arch=x64 --platform=linux --target=12.13.1 sharp
       - rm -rf node_modules/exiftool.js/test
   build:
     commands:
