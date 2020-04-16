@@ -76,16 +76,16 @@ module.exports.handler = async (event, context) => {
     // Setup query
     if (type) {
       query = `INSERT INTO ${process.env.PG_ITEMS_TABLE}
-          (s3_key,status, contributor, item_type, created_at, updated_at)
-          VALUES ($1, $2, $3, $4, current_timestamp, current_timestamp)
+          (s3_key,status, contributor, item_type, created_at, updated_at, on_homepage)
+          VALUES ($1, $2, $3, $4, current_timestamp, current_timestamp, 'true')
           RETURNING id, s3_key;`;
 
-      // Setup values
+      // Setup valuess
       values = [event.decodedSrcKey,false,cuuid,type];
     } else {
       query = `INSERT INTO ${process.env.PG_ITEMS_TABLE}
-          (s3_key,status, contributor, created_at, updated_at)
-          VALUES ($1, $2, $3, current_timestamp, current_timestamp)
+          (s3_key,status, contributor, created_at, updated_at, on_homepage)
+          VALUES ($1, $2, $3, current_timestamp, current_timestamp, 'true')
           RETURNING id, s3_key;`;
 
       // Setup values
