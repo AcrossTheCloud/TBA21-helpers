@@ -18,6 +18,17 @@ const s3WriteableStream = (destBucket, destKey) => {
   return { writeStream: pass, promise: prom };
 }
 
+cleanTmpDir = async () => {
+  const directory = '/tmp';
+  try {
+    const files = await readdir(directory);
+    const unlinkPromises = files.map(filename => unlink(`${directory}/${filename}`));
+    return Promise.all(unlinkPromises);
+  } catch (err) {
+    console.log(err);
+  }
+
+}
 
 module.exports.handler = async (event, context) => {
 
@@ -122,6 +133,7 @@ module.exports.handler = async (event, context) => {
 
     }
 
+    await cleanTmpdir();
 
 
     return ({ uploadedObjects: resolvedData });
