@@ -5,7 +5,7 @@ var ses = new aws.SES();
 exports.handler = (event, context, callback) => {
     console.log(event);
 
-    if (event.request.userAttributes.email) {
+    if (event.request.userAttributes.email && event.triggerSource !== 'PostConfirmation_ConfirmForgotPassword') {
             sendEmail(event.request.userAttributes.email, 
               function(status) {
             // Return to Amazon Cognito
